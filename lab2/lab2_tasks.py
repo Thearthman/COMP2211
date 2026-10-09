@@ -3,7 +3,6 @@ import numpy as np
 from pandas import DataFrame
 
 
-
 def pandas_to_numpy_features(df: DataFrame) -> np.ndarray:
     """Convert the feature DataFrame into a NumPy array.
 
@@ -28,11 +27,15 @@ def pandas_to_numpy_features(df: DataFrame) -> np.ndarray:
     - Map Month, VisitorType, and Weekend to integer codes.
     - Return the six feature columns as a NumPy array with shape (n, 6).
     """
+    MONTH = {"Jan":0, "Feb":1, "Mar":2, "Apr":3, "May":4, "June":5, "Jul":6, "Aug": 7, "Sep": 8, "Oct": 9, "Nov": 10, "Dec": 11}
+    VTYPE = {"Returning_Visitor": 0, "New_Visitor":1, "Other": 2}
     
-    X_train_cp = X_train.copy()
-    print(X_train_cp)
-    raise NotImplementedError("Implement pandas_to_numpy_features")
-
+    
+    df_cp = df.copy()
+    df_cp["Month"] = df_cp["Month"].map(MONTH).astype(int)
+    df_cp["VisitorType"] = df_cp["VisitorType"].map(VTYPE).astype(int)
+    df_cp["Weekend"] = df_cp["Weekend"].astype(int)
+    return np.array(df_cp)
 
 def pandas_to_numpy_revenue(df: DataFrame) -> np.ndarray:
     """Convert the "Revenue" column into a NumPy array.
@@ -50,10 +53,13 @@ def pandas_to_numpy_revenue(df: DataFrame) -> np.ndarray:
     - Map Revenue values to integer codes.
     - Return a NumPy array with shape (n,).
     """
-    raise NotImplementedError("Implement pandas_to_numpy_revenue")
+
+    return np.array(df.astype(int)).flatten()
+    
 
 if __name__ == "__main__":
     # run the above 2 functions and produce a small expected output
+
     X_train = pd.read_csv("X_train.csv")
     y_train = pd.read_csv("y_train.csv")
     X_test = pd.read_csv("X_test.csv")
@@ -83,7 +89,8 @@ def estimate_priors(y_train: np.ndarray) -> np.ndarray:
     - Count how often each class appears in y_train.
     - Return the class probabilities as a NumPy array.
     """
-    raise NotImplementedError("Implement estimate_priors")
+    
+    return np.bincount(y_train.flatten())/y_train.size
 
 if __name__ == "__main__":
     X_train = pd.read_csv("X_train.csv")
@@ -95,7 +102,7 @@ if __name__ == "__main__":
     print(priors)
 
 
-def cat_likelihood(X_train_feature, y_train_feature, X_test_feature, alpha) -> np.ndarray:
+def cat_likelihood(X_train_feature: np.ndarray, y_train_feature, X_test_feature, alpha) -> np.ndarray:
     """Estimate P(X_f = x | Y = j) for one categorical feature using Laplace smoothing.
 
     Args:
@@ -119,7 +126,16 @@ def cat_likelihood(X_train_feature, y_train_feature, X_test_feature, alpha) -> n
     - Use Laplace smoothing with the provided alpha value.
     - Return an array with shape (n_test, C).
     """
-    raise NotImplementedError("Implement cat_likelihood")
+    c_size = np.unique(y_train_feature.flatten()).size
+    if X_test_feature.size ==0:
+        return np.zeros((0,c_size))
+    num_categories = int(max(X_train_feature.max(), X_test_feature.max())+1)
+    bin_coded_feature_class = (X_train_feature * c_size + y_train_feature.flatten()).astype(int)
+    count_numerator = np.bincount(bin_coded_feature_class,minlength=num_categories*c_size).reshape(num_categories,c_size) + alpha
+    count_denom = np.bincount(y_train_feature.flatten()) + alpha*num_categories
+    prob = count_numerator/count_denom
+    return prob[X_test_feature.astype(int)]
+
 
 if __name__ == "__main__":
     X_train = pd.read_csv("X_train.csv")
@@ -164,7 +180,19 @@ def num_likelihood(X_train_feature: np.ndarray, y_train_feature: np.ndarray, X_t
     - Evaluate the Gaussian PDF for each test value.
     - Return an array with shape (n_test, C).
     """
-    raise NotImplementedError("Implement num_likelihood")
+    # Completely based on the fact that y has only two class 0 and 1
+    y_train_feature = y_train_feature.flatten().astype(int)
+    if X_test_feature.size ==0:
+        c_size = np.unique(y_train_feature.flatten()).size
+        return np.zeros((0,c_size))
+    mean_denom = np.bincount(y_train_feature)
+    mean = np.bincount(y_train_feature,weights=X_train_feature) / mean_denom
+    dev = X_train_feature - mean[y_train_feature]
+    var = (np.bincount(y_train_feature,weights=dev**2) / mean_denom) + 10**(-9)
+    prob_denom = np.sqrt(var*2*np.pi)
+    prob = np.exp(-(X_test_feature[:,None]-mean[None,:])**2/(var[None,:] * 2)) /prob_denom[None,:]
+    return prob
+
 
 if __name__ == "__main__":
     X_train = pd.read_csv("X_train.csv")
@@ -212,7 +240,8 @@ def predict(X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray, feat_t
     - Use log probabilities to choose the most likely class.
     - Return predictions with shape (n_test,).
     """
-    raise NotImplementedError("Implement predict")
+    return (np.log(np.array([cat_likelihood(X_train[:,i],y_train,X_test[:,i],alpha=1) if (feat_type_list[i]=="categorical") else num_likelihood(X_train[:,i],y_train,X_test[:,i]) for i in range(len(feat_type_list))])).sum(axis=0) + np.log(estimate_priors(y_train))).argmax(axis=1)
+
 
 if __name__ == "__main__":
     X_train = pd.read_csv("X_train.csv")
