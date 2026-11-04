@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+	<!-- ### Change assignment number ### -->
+    <title>COMP 2211 Assignment 1: Autonomous Driving: Post-Processing on Traffic Sign Recognition</title>
+
+   <!-- Bootstrap core CSS -->
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="css/blog-home.css" rel="stylesheet">
+
+  <!-- For code highlighting -->
+  <link href="vendor/prism/prism.css" rel="stylesheet" />
+
+  <style>
+    pre {
+      background: #f4f4f4;
+      border: 1px solid #ddd;
+      border-left: 3px solid #f36d33;
+      color: #666;
+      page-break-inside: avoid;
+      font-family: monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 1.6em;
+      max-width: 100%;
+      overflow: auto;
+      padding: 1em 1.5em;
+      display: block;
+      word-wrap: break-word;
+    }
+
+    span.input {
+      color: #00f700;
+      ;
+    }
+
+    /* table {
+      width: 100%;
+      display: inline-block;
+      overflow-x: auto;
+    }
+
+    table caption {
+      font-size: medium;
+    }
+
+    table thead th {
+      background-color: #ddd;
+    }
+
+    table th,
+    table td {
+      text-align: left;
+      padding: 3px 6px;
+      border-width: 1px;
+      border-style: solid;
+      border-color: #aaa #aaa;
+    }
+
+    table tr:nth-child(even) {
+      background-color: #eee;
+    } */
+
+    blockquote {
+      border: 1px solid #b3b3b3;
+      border-left: 10px solid #b3b3b3;
+      border-radius: 0px;
+      background: #fafafa;
+      font-size: 18px;
+      font-family: Georgia, serif;
+      margin: 10px;
+      padding: 10px 20px;
+    }
+
+    blockquote p {
+      margin: 0;
+      line-height: 30px;
+      padding-bottom: 20px;
+    }
+
+    blockquote.small {
+      display: block;
+      font-size: 80%;
+      color: brown;
+      text-align: right;
+    }
+
+    code {
+      /* color: goldenrod; */
+      font-size: 1em;
+      /* background: none !important; */
+    }
+
+    figure.figure {
+      width: 100%;
+      text-align: center;
+    }
+
+    .bd-callout {
+      padding: 1.25rem;
+      margin-top: 1.25rem;
+      margin-bottom: 1.25rem;
+      border: 1px solid #eee;
+      border-left-width: .25rem;
+      border-radius: .25rem;
+    }
+
+    .bd-callout h4 {
+      margin-top: 0;
+      margin-bottom: .25rem;
+    }
+
+    .bd-callout p:last-child {
+      margin-bottom: 0;
+    }
+
+    .bd-callout code {
+      border-radius: .25rem;
+    }
+
+    .bd-callout+.bd-callout {
+      margin-top: -.25rem;
+    }
+
+    .bd-callout-info {
+      border-left-color: #5bc0de;
+    }
+
+    .bd-callout-warning {
+      border-left-color: #f0ad4e;
+    }
+
+    .bd-callout-danger {
+      border-left-color: #d9534f;
+    }
+
+    .bd-callout-success {
+      border-left-color: #5cb85c;
+    }
+
+    .bd-callout-primary {
+      border-left-color: #428bca;
+    }
+
+    .bd-callout-info h6 {
+      color: #5bc0de;
+    }
+
+    .bd-callout-warning h6 {
+      color: #f0ad4e;
+    }
+
+    .bd-callout-danger h6 {
+      color: #d9534f;
+    }
+
+    .bd-callout-success h6 {
+      color: #5cb85c;
+    }
+
+    .bd-callout-primary h6 {
+      color: #428bca;
+    }
+  </style>
+  </head>
+
+  <body>
+  <script src="vendor/prism/prism.js"></script>
+  <!--     <script src="https://myCDN.com/prism@v1.x/components/prism-core.min.js"></script>
+    <script src="https://myCDN.com/prism@v1.x/plugins/autoloader/prism-autoloader.min.js"></script> -->
+
+    <!-- Page Content -->	
+    <div class="container">
+
+      <div class="row">
+
+        <!-- Entries Column -->
+        <div class="col-md-9">
+
+          <h2 class="my-4"><span style="color:darkblue">COMP 2211</span>
+            <small>Introduction to Artificial Intelligence</small>
+          </h2>
+		  
+		  <!-- ### Change assignment number and title ### -->
+		  <h3 class="my-4">Programming Assignment 1
+            <span style="color:#660066">Autonomous Driving: Post-Processing on Traffic Sign Recognition</span>
+          </h3>
+
+          <!-- Introduction section -->
+		  <!-- ### Complete introduction section for the assignment ### -->
+          <div class="card mb-4">
+            
+		    <!-- ### Add an image representing the assignment content here ### -->
+            <img class="card-img-top" src="images/traffic-signs.svg" alt="The four traffic sign classes: Speed Limit, Stop, Yield, and Ahead Only">
+            <div class="card-body" id="introduction">
+              <h3 class="card-title">Introduction</h3>
+              <p class="card-text">Traffic sign recognition helps autonomous driving systems understand the road environment. In this assignment, you will build a classification pipeline using continuous features already extracted from traffic-sign images.</p>
+              <p class="card-text">You will explore the feature space with K-Means, implement Gaussian Naive Bayes (GNB) and K-Nearest Neighbors (KNN), and combine the two classifiers by using KNN when GNB predictions have a small confidence margin.</p>
+              <h4>Data description</h4>
+              <p>The dataset contains <b>3,200 samples</b>, <b>10 continuous features</b>, and a <code>label</code> column. Each of the four classes contains 800 samples.</p>
+              <ul><li><code>0</code>: Speed Limit</li><li><code>1</code>: Stop</li><li><code>2</code>: Yield</li><li><code>3</code>: Ahead Only</li></ul>
+              <p>The features describe colour ratios, shape, symmetry, centre density, and edge contrast. You will work with the provided CSV file; image processing is not required.</p>
+            </div>
+            <div class="card-footer text-muted">
+              End of Introduction
+            </div>
+          </div>
+
+          <!-- Description section -->
+		  <!-- ### Complete description section for the assignment ### -->
+          <div class="card mb-4">      
+            <div class="card-body" id="assignment_tasks">
+              <h3 class="card-title">Task Description</h3>
+              <p class="card-text">The notebook contains Part 0 (setup and data exploration) and Parts 1-7, with 14 numbered TODO tasks. The notebook includes detailed instructions, function signatures, and provided code.</p>
+              <p>Each part includes a provided <code>if __name__ == "__main__":</code> block to run that part and inspect its results after completing the relevant TODOs. Run the notebook cells in order, since later parts use results from earlier parts.</p>
+              <p>The examples below show selected reference outputs for the provided dataset and data split. Only key results are shown. Small floating-point and formatting differences are normal.</p>
+              <h4>Part 0: Setup &amp; Data Exploration <small>(Provided code)</small></h4>
+              <p>Load the feature dataset, inspect the class counts, and split the samples into training, validation, and test sets. The provided main block prints the dataset summary and split sizes.</p>
+              <pre><code>Dataset shape: (3200, 11)
+Training samples: 2239
+Validation samples: 481
+Testing samples: 480</code></pre>
+              <h4>Part 1: Data Preprocessing (Feature Scaling) <small>(TODO-1)</small></h4>
+              <p>Standardize each feature using the training-set mean and standard deviation, then apply the same transformation to the validation and test sets. The main block prints the scaled training means and standard deviations, which should be approximately 0 and 1 respectively. The example below is rounded for readability.</p>
+              <pre><code>Scaled train mean: [0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+Scaled train std:  [1. 1. 1. 1. 1. 1. 1. 1. 1. 1.]</code></pre>
+              <h4>Part 2: Feature Space Exploration with K-Means <small>(TODO-2, 3, 4)</small></h4>
+              <p>Implement nearest-centroid assignment, centroid updates, and WCSS (the SSE introduced in the lectures). Explore natural groups in the standardized feature space without using class labels. The main block runs K-Means for K=1 to 10 and plots WCSS for the Elbow Method.</p>
+              <figure>
+                <img class="img-fluid" src="images/expected-wcss.png" alt="Reference WCSS curve for K-Means with K from 1 to 10 on the standardized training set">
+                <figcaption><small>Expected WCSS plot using the provided initialization and stopping rule.</small></figcaption>
+              </figure>
+              <h4>Part 3: Primary Supervised Learner: Gaussian Naive Bayes <small>(TODO-5, 6)</small></h4>
+              <p>Learn each class's feature means, variances, and prior probability from the training set, then predict the highest-scoring class. The main block trains GNB and prints validation and test accuracy.</p>
+              <pre><code>GNB Validation Accuracy: 0.8960
+GNB Test Accuracy: 0.9104</code></pre>
+              <h4>Part 4: Learned Feature Analysis <small>(TODO-7, 8)</small></h4>
+              <p>Use the learned GNB statistics to rank global feature discriminativeness and calculate feature contributions for an individual prediction. The main block prints the global feature ranking. The first three entries are shown below.</p>
+              <pre><code>Feature ranking (most discriminative first):
+Blue_Color_Ratio     4.5822
+Symmetry_Y           4.0891
+Red_Color_Ratio      3.3827
+...</code></pre>
+              <h4>Part 5: KNN Fallback Learner <small>(TODO-9, 10, 11)</small></h4>
+              <p>Compute Euclidean distances, predict by neighbor majority vote, and select K using validation accuracy. The main block compares candidate K values and evaluates the selected KNN model on the test set.</p>
+              <pre><code>Best K: 9
+KNN Test Accuracy (K=9): 0.9896</code></pre>
+              <h4>Part 6: Confidence-Based GNB to KNN Fallback <small>(TODO-12, 13)</small></h4>
+              <p>Use the difference between the highest and second-highest GNB scores to identify uncertain predictions. Select a threshold on the validation set and use KNN only when the margin is below it. The main block prints the selected threshold, hybrid test accuracy, and proportion of samples sent to KNN.</p>
+              <pre><code>Best fallback threshold: 14
+Hybrid Test Accuracy: 0.9875
+Fallback rate on test set: 29.38%</code></pre>
+              <h4>Part 7: Multi-Class Evaluation <small>(TODO-14)</small></h4>
+              <p>Calculate per-class precision, recall, and F1, then average the four F1 scores to obtain Macro-F1. The main block prints confusion matrices and Macro-F1 for GNB, KNN, and the hybrid model. Selected results appear below. Confusion-matrix rows are true classes and columns are predicted classes, in label order 0-3.</p>
+              <pre><code>GNB Macro F1-Score: 0.9103
+KNN Macro F1-Score: 0.9896
+
+Hybrid Confusion Matrix:
+[[118   0   0   2]
+ [  3 117   0   0]
+ [  0   0 119   1]
+ [  0   0   0 120]]
+Hybrid Macro F1-Score: 0.9875</code></pre>
+              <p>Use the training set to fit models and compute scaling statistics, the validation set to select K and the fallback threshold, and the test set for final evaluation.</p>
+            </div>
+			<div class="card-footer text-muted">
+              End of Task Description
+            </div>
+          </div>
+
+          <!-- Grading section -->
+		  <!-- ### Complete grading section for the assignment ### -->
+          <div class="card mb-4">      
+            <div class="card-body" id="grading_scheme">
+              <h3 class="card-title">Grading Scheme</h3>
+              <p class="card-text">The grading scheme is as follows (<b>15 points total</b>).</p>
+
+              <p class="card-text">&nbsp;&nbsp;&nbsp;&nbsp; <b>Points for Part 1</b> (1 point total)</p>
+              <ul>
+                <li><i>(1 point)</i> <b>TODO-1:</b> Standardize features using training-set statistics.</li>
+              </ul>
+
+              <p class="card-text">&nbsp;&nbsp;&nbsp;&nbsp; <b>Points for Part 2</b> (3.5 points total)</p>
+              <ul>
+                <li><i>(1.5 points)</i> <b>TODO-2:</b> Assign each sample to its nearest centroid.</li>
+                <li><i>(1.5 points)</i> <b>TODO-3:</b> Update each centroid using its assigned samples.</li>
+                <li><i>(0.5 points)</i> <b>TODO-4:</b> Compute the within-cluster sum of squares (WCSS).</li>
+              </ul>
+
+              <p class="card-text">&nbsp;&nbsp;&nbsp;&nbsp; <b>Points for Part 3</b> (4 points total)</p>
+              <ul>
+                <li><i>(3 points)</i> <b>TODO-5:</b> Learn the per-class means, variances, and log priors for Gaussian Naive Bayes.</li>
+                <li><i>(1 point)</i> <b>TODO-6:</b> Predict the class with the largest log posterior score.</li>
+              </ul>
+
+              <p class="card-text">&nbsp;&nbsp;&nbsp;&nbsp; <b>Points for Part 4</b> (1 point total)</p>
+              <ul>
+                <li><i>(0.5 points)</i> <b>TODO-7:</b> Compute feature discriminativeness scores.</li>
+                <li><i>(0.5 points)</i> <b>TODO-8:</b> Compute and rank feature evidence for a prediction.</li>
+              </ul>
+
+              <p class="card-text">&nbsp;&nbsp;&nbsp;&nbsp; <b>Points for Part 5</b> (4 points total)</p>
+              <ul>
+                <li><i>(2 points)</i> <b>TODO-9:</b> Compute the Euclidean distance matrix for KNN.</li>
+                <li><i>(1.5 points)</i> <b>TODO-10:</b> Predict labels by majority vote among the K nearest neighbours.</li>
+                <li><i>(0.5 points)</i> <b>TODO-11:</b> Select K using validation accuracy.</li>
+              </ul>
+
+              <p class="card-text">&nbsp;&nbsp;&nbsp;&nbsp; <b>Points for Part 6</b> (1 point total)</p>
+              <ul>
+                <li><i>(0.5 points)</i> <b>TODO-12:</b> Select the GNB-to-KNN fallback threshold using validation accuracy.</li>
+                <li><i>(0.5 points)</i> <b>TODO-13:</b> Use KNN for low-confidence samples and return the hybrid predictions and fallback mask.</li>
+              </ul>
+
+              <p class="card-text">&nbsp;&nbsp;&nbsp;&nbsp; <b>Points for Part 7</b> (0.5 points total)</p>
+              <ul>
+                <li><i>(0.5 points)</i> <b>TODO-14:</b> Compute the confusion matrix and Macro-F1.</li>
+              </ul>
+
+              <p class="card-text">Notes:</p>
+              <ul>
+                <li><b>Public test cases on ZINC before the deadline will not contribute to your final score.</b> They provide basic checks of your outputs. After the deadline, your code will be graded using hidden test cases according to the breakdown above. Passing all public tests does not guarantee full marks.</li>
+              </ul>
+              <p>Implement the requested algorithms from scratch as specified in the notebook.</p>
+            </div>
+      <div class="card-footer text-muted">
+              End of Grading Scheme
+            </div>
+          </div>
+
+          <!-- Download section -->
+		  <!-- ### Complete download section for the assignment ### -->
+          <div class="card mb-4">            
+            <div class="card-body" id="download">
+              <h3 class="card-title">Download</h3>
+              <ul>
+                <li>Skeleton code: <a download href="pa1_tasks.ipynb">pa1_tasks.ipynb</a></li>
+                <li>Dataset: <a download href="traffic_signs_features.csv">traffic_signs_features.csv</a></li>
+              </ul>
+              <p>Please download the notebook and dataset, open the notebook in Google Colab, and upload <code>traffic_signs_features.csv</code> to the runtime.</p>
+            </div>            
+			<div class="card-footer text-muted">
+              End of Download
+            </div>
+          </div>
+		  
+		  <!-- Submission and deadline section -->
+		  <!-- ### Complete submission and deadline section for the assignment ### -->
+          <div class="card mb-4">            
+            <div class="card-body" id="submission">
+              <h3 class="card-title">Submission and Deadline</h3>
+              <p><b>Deadline:</b> 24 October 2026 (Saturday), 23:59 HKT.</p>
+              <h4>Submission Instructions</h4>
+              <ul>
+                <li>Submit <code>pa1_tasks.py</code> to ZINC by following these steps:
+                  <ul>
+                    <li>Comment out any additional script you may have included for debugging purposes.</li>
+                    <li>Click <code>File</code> &rarr; <code>Download</code> &rarr; <code>Download .py</code>.</li>
+                    <li>Make sure the name of the .py file is <code>pa1_tasks.py</code>, as this is necessary for ZINC to check your work.</li>
+                    <li>Drag the <code>pa1_tasks.py</code> file over to <a href="https://zinc.cse.ust.hk">ZINC</a>'s submission panel.</li>
+                  </ul>
+                </li>
+              </ul>
+              <h4>Late Submission Policy</h4>
+              <p>There will be a penalty of -1 point (out of 100) for every minute of late submission.</p>
+              <p>Since the maximum score for this assignment is 15 points, your final score will be calculated by converting your raw percentage score back to the 15-point scale. Effectively, each minute of lateness deducts 1% of the total score (which equals -0.15 points out of 15).</p>
+              <p>Example: Given the PA1 deadline of 23:59:00 on October 24th, 2026, a submission at 01:00:00 on October 25th, 2026 is 61 minutes late. This incurs a 61-point penalty (out of 100), which translates to a 9.15-point deduction from your final score of 15.</p>
+              <p>Minimum Score: The minimum achievable score for an assignment is zero; any negative score following late (and other) deductions will be reset to zero.</p>
+            </div>
+			<div class="card-footer text-muted">
+              End of Submission and Deadline
+            </div>
+          </div>
+		  
+          <!-- Public test cases section -->
+          <div class="card mb-4">
+            <div class="card-body" id="public_test_cases">
+              <h3 class="card-title">Public Test Cases</h3>
+              <p><a href="pa1_colab_guide.pdf" target="_blank" rel="noopener">Step-by-step guide: Running Public Tests in Google Colab (PDF)</a></p>
+              <p class="card-text">The inputs and expected outputs for all 13 public test cases are listed below.</p>
+              <p>These test cases and their testing logic are identical to the public tests on ZINC and provide a preliminary check of your code's correctness. Your final score will be determined by a separate set of hidden tests.</p>
+              <p>To run these public tests in the assignment notebook, download <a download href="public_test_cases.zip">public_test_cases.zip</a>. In Colab, upload the ZIP through the left-hand Files panel. In local Jupyter, place it in the notebook's working directory. No manual extraction is needed. Run <b>Public Test Setup</b> once, then run the <b>Public Tests</b> cell at the end of each Part after running your implementation cells.</p>
+              <h4 id="public-p01">P01: TODO-1 <small><code>standardize_features()</code></small></h4>
+              <p>Checks feature-wise standardization of training, validation and test arrays using training statistics only.</p>
+              <p><b>Input</b></p>
+              <pre><code>X_train = [[1, 2], [3, 6]]
+X_val = [[5, 10]]
+X_test = [[-1, -2]]</code></pre>
+              <p><b>Expected Output</b></p>
+              <pre><code>X_train_scaled = [[-1, -1], [1, 1]]
+X_val_scaled = [[3, 3]]
+X_test_scaled = [[-3, -3]]</code></pre>
+              <h4 id="public-p02">P02: TODO-2-3 <small><code>KMeansClustering.fit()</code></small></h4>
+              <p>Checks nearest-centroid assignments and updated centroids.</p>
+              <p><b>Input</b></p>
+              <pre><code>X = [[0, 0], [0, 2], [10, 0], [10, 2]]
+k = 2, max_iters = 100
+Initialization uses the provided random seed 42.</code></pre>
+              <p><b>Expected Output</b></p>
+              <pre><code>centroids = [[0, 1], [10, 1]] (cluster order may differ)
+Samples 0 and 1 belong to the first centroid above, samples 2 and 3 to the second.</code></pre>
+              <h4 id="public-p03">P03: TODO-4 <small><code>KMeansClustering.compute_wcss()</code></small></h4>
+              <p>Checks the sum of squared Euclidean distances to assigned centroids.</p>
+              <p><b>Input</b></p>
+              <pre><code>X = [[0, 0], [2, 0], [10, 0], [12, 0]]
+k = 2
+centroids = [[1, 0], [11, 0]]
+labels = [0, 0, 1, 1]</code></pre>
+              <p><b>Expected Output</b></p>
+              <pre><code>4.0</code></pre>
+              <h4 id="public-p04">P04: TODO-5 <small><code>GaussianNaiveBayes.fit()</code></small></h4>
+              <p>Checks class labels, per-class means, variances and log priors.</p>
+              <p><b>Input</b></p>
+              <pre><code>X = [[0, 2], [2, 4], [6, 8], [10, 12]]
+y = [0, 0, 1, 1]</code></pre>
+              <p><b>Expected Output</b></p>
+              <pre><code>classes = [0, 1]
+mean = [[1, 3], [8, 10]]
+var = [[1, 1], [4, 4]]
+log_priors = [-0.6931471805599453, -0.6931471805599453]</code></pre>
+              <h4 id="public-p05">P05: TODO-6 <small><code>GaussianNaiveBayes.predict()</code></small></h4>
+              <p>Checks GNB prediction using fixed means, variances and log priors.</p>
+              <p><b>Input</b></p>
+              <pre><code>X = [[1, 1], [9, 9]]
+classes = [0, 1]
+mean = [[0, 0], [10, 10]]
+var = [[1, 1], [1, 1]]
+log_priors = [-0.6931471805599453, -0.6931471805599453]</code></pre>
+              <p><b>Expected Output</b></p>
+              <pre><code>[0, 1]</code></pre>
+              <h4 id="public-p06">P06: TODO-7 <small><code>feature_discriminativeness()</code></small></h4>
+              <p>Checks the feature separation scores from class means and within-class variances.</p>
+              <p><b>Input</b></p>
+              <pre><code>gnb.classes = [0, 1]
+gnb.log_priors = log([0.5, 0.5])
+gnb.mean = [[0, 1], [2, 5]]
+gnb.var = [[1, 2], [1, 2]]</code></pre>
+              <p><b>Expected Output</b></p>
+              <pre><code>[1.0, 2.0]</code></pre>
+              <h4 id="public-p07">P07: TODO-8 <small><code>explain_prediction()</code></small></h4>
+              <p>Checks the predicted class, feature ordering and Gaussian log-density contributions.</p>
+              <p><b>Input</b></p>
+              <pre><code>x = [0, 0]
+feature_names = [&#x27;red&#x27;, &#x27;shape&#x27;]
+gnb.classes = [0, 1]
+gnb.mean = [[0, 0], [5, 5]]
+gnb.var = [[1, 4], [2, 3]]
+gnb.log_priors = log([0.5, 0.5])</code></pre>
+              <p><b>Expected Output</b></p>
+              <pre><code>predicted_class = 0
+ranked_features = [(&#x27;red&#x27;, -0.9189385337046727), (&#x27;shape&#x27;, -1.612085713889618)]</code></pre>
+              <h4 id="public-p08">P08: TODO-9 <small><code>KNNClassifier.compute_distances()</code></small></h4>
+              <p>Checks the Euclidean distance matrix, including a distance of 5 rather than its square, 25.</p>
+              <p><b>Input</b></p>
+              <pre><code>X_train = [[0, 0], [6, 8]]
+y_train = [0, 1]
+X_test = [[3, 4], [0, 0]]
+k = 1</code></pre>
+              <p><b>Expected Output</b></p>
+              <pre><code>[[5, 5], [0, 10]]</code></pre>
+              <h4 id="public-p09">P09: TODO-10 <small><code>KNNClassifier.predict()</code></small></h4>
+              <p>Checks majority voting for K=3 using predefined neighbor distances and labels. Neighbor selection is checked independently of distance calculation.</p>
+              <p><b>Input</b></p>
+              <pre><code>X_train = [[0.1], [0.2], [0.3], [0.4]]
+y_train = [0, 1, 1, 2]
+X_test = [[0]]
+k = 3
+Independent Euclidean distance calculation returns [[0.1, 0.2, 0.3, 0.4]].</code></pre>
+              <p><b>Expected Output</b></p>
+              <pre><code>[1]</code></pre>
+              <h4 id="public-p10">P10: TODO-11 <small><code>find_best_k()</code></small></h4>
+              <p>Checks fitting on the supplied training data and predicting the validation data for candidate K values [1, 3], then selecting the best K and returning accuracies. A controlled KNN model isolates this task.</p>
+              <p><b>Input</b></p>
+              <pre><code>X_train = [[0], [0.2], [0.4], [2]]
+y_train = [0, 1, 1, 0]
+X_val = [[0.01], [0.21]]
+y_val = [1, 1]
+k_choices = [1, 3]
+Independent KNN validation predictions: k=1 -&gt; [0, 1], k=3 -&gt; [1, 1].
+The test also checks that fit() receives the training data before predict() receives X_val.</code></pre>
+              <p><b>Expected Output</b></p>
+              <pre><code>best_k = 3
+accuracies = [0.5, 1.0]</code></pre>
+              <h4 id="public-p11">P11: TODO-12 <small><code>select_fallback_threshold()</code></small></h4>
+              <p>Checks selection of the best fallback threshold from [0, 2, 4, 6].</p>
+              <p><b>Input</b></p>
+              <pre><code>X_val = [[1.5], [3.5], [5.5]]
+y_val = [1, 1, 0]
+candidate_thresholds = [0, 2, 4, 6]
+gnb.classes = [0, 1, 2, 3]
+gnb.mean = [[1], [0], [-10], [-20]]
+gnb.var = [[1], [1], [1], [1]]
+gnb.log_priors = log([0.25, 0.25, 0.25, 0.25])
+GNB top-two margins are [1, 3, 5].
+KNN: k=1, X_train=X_val, y_train=[1, 1, 1]. Every query is predicted as label 1.</code></pre>
+              <p><b>Expected Output</b></p>
+              <pre><code>4</code></pre>
+              <h4 id="public-p12">P12: TODO-13 <small><code>hybrid_predict()</code></small></h4>
+              <p>Checks hybrid predictions, a Boolean fallback mask and calling KNN only on the fallback subset.</p>
+              <p><b>Input</b></p>
+              <pre><code>X = [[1.5], [4.5]]
+threshold = 2
+gnb.classes = [0, 1, 2, 3]
+gnb.mean = [[1], [0], [-10], [-20]]
+gnb.var = [[1], [1], [1], [1]]
+gnb.log_priors = log([0.25, 0.25, 0.25, 0.25])
+GNB top-two margins are [1, 4].
+KNN: k=1, X_train=X, y_train=[2, 1]. Must be called once with [[1.5]], returning [2].</code></pre>
+              <p><b>Expected Output</b></p>
+              <pre><code>predictions = [2, 0]
+fallback_mask = [True, False]
+KNN calls = 1</code></pre>
+              <h4 id="public-p13">P13: TODO-14 <small><code>evaluate_multiclass()</code></small></h4>
+              <p>Checks the confusion matrix and Macro-F1 for 4 classes using fixed true and predicted labels.</p>
+              <p><b>Input</b></p>
+              <pre><code>y_true = [0, 0, 1, 1, 2, 2, 3, 3]
+y_pred = [0, 1, 1, 1, 2, 0, 3, 2]
+num_classes = 4</code></pre>
+              <p><b>Expected Output</b></p>
+              <pre><code>confusion_matrix = [[1, 1, 0, 0], [0, 2, 0, 0], [1, 0, 1, 0], [0, 0, 1, 1]]
+macro_f1 = 0.6166666666666667</code></pre>
+            </div>
+            <div class="card-footer text-muted">
+              End of Public Test Cases
+            </div>
+          </div>
+
+		  <!-- FAQ section -->
+		  <!-- ### Complete FAQ section for the assignment ### -->
+          <div class="card mb-4">            
+            <div class="card-body" id="faq">
+              <h3 class="card-title">Frequently Asked Questions</h3>
+              <p><b>Q: Do I need the original traffic-sign images?</b><br>A: No. The assignment uses the pre-extracted features in <code>traffic_signs_features.csv</code>.</p>
+              <p><b>Q: My code doesn't work / there is an error. Can you help me fix it?</b><br>A: As this is a major course assessment, we will not debug your code for you. We can explain concepts, but the implementation is your responsibility.</p>
+            </div>
+		    <div class="card-footer text-muted">
+              End of Frequently Asked Questions
+            </div>          
+          </div>
+        </div>
+				
+        <!-- Sidebar Widgets Column -->
+        <div class="col-md-3">
+		  <div class="sticky-top">
+            <!-- Menu Widget -->
+            <div class="card my-12">
+              <h5 class="card-header">Menu</h5>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-lg-12">
+                    <ul class="mb-0" type="circle" style="padding-left:20px">
+                      <li>
+                        <a href="#introduction">Introduction</a>
+                      </li>
+                      <li>
+                        <a href="#assignment_tasks">Task Description</a>
+                      </li>
+                      <li>
+                        <a href="#grading_scheme">Grading Scheme</a>
+                      </li>
+                      <li>
+                        <a href="#download">Download</a>
+                      </li>
+			  		  <li>
+					    <a href="#submission">Submission &amp; Deadline</a>
+					  </li>
+                      <li>
+                        <a href="#public_test_cases">Public Test Cases</a>
+                      </li>
+					  <li>
+					    <a href="#faq">Frequently Asked Questions</a>
+					  </li>
+                    </ul>
+                  </div>                
+                </div>
+              </div>
+            </div>
+		  
+		    <!-- Maintainance widget -->
+            <div class="card my-4">
+              <h5 class="card-header">Page maintained by</h5>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-lg-12">
+                    <ul class="list-unstyled mb-0">
+                      <li>Xing HAN</li>
+                      <li>Email: <a href="mailto:xhanbg@connect.ust.hk">xhanbg@connect.ust.hk</a></li>
+                      <li>CHEN, Ruiping</li>
+                      <li>Email: <a href="mailto:rchenbt@connect.ust.hk">rchenbt@connect.ust.hk</a></li>
+                      <li>Last Modified: <script type="text/javascript">document.write(document.lastModified);</script></li>
+                    </ul>
+                  </div>				
+                </div>
+              </div>
+            </div>
+		  
+		  
+		    <!-- Homepage widget -->
+            <div class="card my-4">
+              <h5 class="card-header">Homepage</h5>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-lg-12">
+                    <ul class="list-unstyled mb-0">
+                      <li>
+                        <a href="http://course.cse.ust.hk/comp2211">Course Homepage</a>
+                      </li>
+                    </ul>
+                  </div>				
+                </div>
+              </div>
+            </div>
+		  </div>
+        </div>
+      </div>
+      <!-- /.row -->
+
+    </div>
+    <!-- /.container -->
+
+    <!-- Footer -->
+    <footer class="py-5 bg-dark">
+      <div class="container">
+        <p class="m-0 text-center text-white">Maintained by COMP 2211 Teaching Team &copy; 2026 HKUST Computer Science and Engineering</p>
+      </div>
+      <!-- /.container -->
+    </footer>
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>	
+  </body>
+
+</html>

@@ -1,0 +1,41 @@
+#,Name,Type 1,Type 2,Total,HP,Attack,Defense,Sp. Atk,Sp. Def,Speed,Generation,Legendary
+3,Venusaur,Grass,Poison,525,80,82,83,100,100,80,1,False
+18,PidgeotMega Pidgeot,Normal,Flying,579,83,80,80,135,80,121,1,False
+55,Golduck,Water,,500,80,82,78,95,80,85,1,False
+68,Machamp,Fighting,,505,90,130,80,65,85,55,1,False
+80,SlowbroMega Slowbro,Water,Psychic,590,95,75,180,130,80,30,1,False
+91,Cloyster,Water,Ice,525,50,95,180,85,45,70,1,False
+131,Lapras,Water,Ice,535,130,85,80,85,95,60,1,False
+142,AerodactylMega Aerodactyl,Rock,Flying,615,80,135,85,70,95,150,1,False
+143,Snorlax,Normal,,540,160,110,65,65,110,30,1,False
+149,Dragonite,Dragon,Flying,600,91,134,95,100,100,80,1,False
+157,Typhlosion,Fire,,534,78,84,78,109,85,100,2,False
+169,Crobat,Poison,Flying,535,85,90,80,70,80,130,2,False
+208,Steelix,Steel,Ground,510,75,85,200,55,65,30,2,False
+229,HoundoomMega Houndoom,Dark,Fire,600,75,90,90,140,90,115,2,False
+233,Porygon2,Normal,,515,85,80,90,105,95,60,2,False
+244,Entei,Fire,,580,115,115,85,90,75,100,2,True
+306,Aggron,Steel,Rock,530,70,110,180,60,60,50,3,False
+373,Salamence,Dragon,Flying,600,95,135,80,110,80,100,3,False
+377,Regirock,Rock,,580,80,100,200,50,100,50,3,True
+379,Registeel,Steel,,580,80,75,150,75,150,50,3,True
+380,Latias,Dragon,Psychic,600,80,80,90,110,130,110,3,True
+381,Latios,Dragon,Psychic,600,80,90,80,130,110,110,3,True
+381,LatiosMega Latios,Dragon,Psychic,700,80,130,100,160,120,110,3,True
+386,DeoxysDefense Forme,Psychic,,600,50,70,160,70,160,90,3,True
+395,Empoleon,Water,Steel,530,84,86,88,111,101,60,4,False
+460,AbomasnowMega Abomasnow,Grass,Ice,594,90,132,105,132,105,30,4,False
+476,Probopass,Rock,Steel,525,60,55,145,75,150,40,4,False
+487,GiratinaOrigin Forme,Ghost,Dragon,680,150,120,100,120,100,90,4,True
+612,Haxorus,Dragon,,540,76,147,90,60,70,97,5,False
+639,Terrakion,Rock,Fighting,580,91,129,90,72,90,108,5,True
+645,LandorusIncarnate Forme,Ground,Flying,600,89,125,90,115,80,101,5,True
+645,LandorusTherian Forme,Ground,Flying,600,89,145,90,105,80,91,5,True
+646,Kyurem,Dragon,Ice,660,125,130,90,130,90,95,5,True
+646,KyuremWhite Kyurem,Dragon,Ice,700,125,120,90,170,100,95,5,True
+673,Gogoat,Grass,,531,123,100,62,97,81,68,6,False
+681,AegislashShield Forme,Steel,Ghost,520,60,50,150,50,150,60,6,False
+699,Aurorus,Rock,Ice,521,123,77,72,99,92,58,6,False
+716,Xerneas,Fairy,,680,126,131,95,131,98,99,6,True
+717,Yveltal,Dark,Flying,680,126,131,95,131,98,99,6,True
+719,Diancie,Rock,Fairy,600,50,100,150,100,150,50,6,True
