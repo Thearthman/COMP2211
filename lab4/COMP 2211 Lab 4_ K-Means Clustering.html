@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+	
+    <title>COMP 2211 Lab 4: K-Means Clustering</title>
+
+   
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  
+  <link href="css/blog-home.css" rel="stylesheet">
+
+  
+  <link href="vendor/prism/prism.css" rel="stylesheet" />
+
+  <style>
+    pre {
+      background: #f4f4f4;
+      border: 1px solid #ddd;
+      border-left: 3px solid #f36d33;
+      color: #666;
+      page-break-inside: avoid;
+      font-family: monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 1.6em;
+      max-width: 100%;
+      overflow: auto;
+      padding: 1em 1.5em;
+      display: block;
+      word-wrap: break-word;
+    }
+
+    span.input {
+      color: #00f700;
+      ;
+    }
+
+    /* table {
+      width: 100%;
+      display: inline-block;
+      overflow-x: auto;
+    }
+
+    table caption {
+      font-size: medium;
+    }
+
+    table thead th {
+      background-color: #ddd;
+    }
+
+    table th,
+    table td {
+      text-align: left;
+      padding: 3px 6px;
+      border-width: 1px;
+      border-style: solid;
+      border-color: #aaa #aaa;
+    }
+
+    table tr:nth-child(even) {
+      background-color: #eee;
+    } */
+
+    blockquote {
+      border: 1px solid #b3b3b3;
+      border-left: 10px solid #b3b3b3;
+      border-radius: 0px;
+      background: #fafafa;
+      font-size: 18px;
+      font-family: Georgia, serif;
+      margin: 10px;
+      padding: 10px 20px;
+    }
+
+    blockquote p {
+      margin: 0;
+      line-height: 30px;
+      padding-bottom: 20px;
+    }
+
+    blockquote.small {
+      display: block;
+      font-size: 80%;
+      color: brown;
+      text-align: right;
+    }
+
+    code {
+      /* color: goldenrod; */
+      font-size: 1em;
+      /* background: none !important; */
+    }
+
+    figure.figure {
+      width: 100%;
+      text-align: center;
+    }
+
+    .bd-callout {
+      padding: 1.25rem;
+      margin-top: 1.25rem;
+      margin-bottom: 1.25rem;
+      border: 1px solid #eee;
+      border-left-width: .25rem;
+      border-radius: .25rem;
+    }
+
+    .bd-callout h4 {
+      margin-top: 0;
+      margin-bottom: .25rem;
+    }
+
+    .bd-callout p:last-child {
+      margin-bottom: 0;
+    }
+
+    .bd-callout code {
+      border-radius: .25rem;
+    }
+
+    .bd-callout+.bd-callout {
+      margin-top: -.25rem;
+    }
+
+    .bd-callout-info {
+      border-left-color: #5bc0de;
+    }
+
+    .bd-callout-warning {
+      border-left-color: #f0ad4e;
+    }
+
+    .bd-callout-danger {
+      border-left-color: #d9534f;
+    }
+
+    .bd-callout-success {
+      border-left-color: #5cb85c;
+    }
+
+    .bd-callout-primary {
+      border-left-color: #428bca;
+    }
+
+    .bd-callout-info h6 {
+      color: #5bc0de;
+    }
+
+    .bd-callout-warning h6 {
+      color: #f0ad4e;
+    }
+
+    .bd-callout-danger h6 {
+      color: #d9534f;
+    }
+
+    .bd-callout-success h6 {
+      color: #5cb85c;
+    }
+
+    .bd-callout-primary h6 {
+      color: #428bca;
+    }
+  </style>
+  </head>
+
+  <body>
+  <script src="vendor/prism/prism.js"></script>
+  
+
+    	
+    <div class="container">
+
+      <div class="row">
+
+        
+        <div class="col-md-9">
+
+          <h2 class="my-4"><span style="color:darkblue">COMP 2211</span>
+            <small>Introduction to Artificial Intelligence</small>
+          </h2>
+		  
+		  
+		  <h3 class="my-4">Lab 4
+            <span style="color:#660066">K-Means Clustering</span>
+          </h3>
+
+                  
+          <div class="card mb-4">
+            <div class="card-body" id="review">
+              <h3 class="card-title">Review</h3>
+        <br/>
+    <p class="card-text">This section reviews the K-means clustering algorithm. It aims to refresh your memory of what you learned in class. 
+      The review will cover:
+    </p>
+<ul>
+      <li>Clustering concept</li>
+      <li>Evaluation and limitations of the K-means clustering algorithm</li>
+      <li>K-means clustering variants</li>
+    </ul>
+        <p class="card-text">
+            To open the review notebook, please do the following:</p>
+            <ul>
+                <li>Download the notebook file by right-clicking and selecting "Save link as": <a download href="files/lab4_review.ipynb">notebook</a>
+                </li>
+                <li>Open the notebook using Google Colab.</li>
+            </ul>
+        <br />
+            </div>
+            <div class="card-footer text-muted">
+              End of Review
+            </div>
+          </div>
+
+          
+		  
+          <div class="card mb-4">
+            
+		    
+            
+            <div class="card-body" id="introduction">
+              <h3 class="card-title">Introduction</h3>
+              <p class="card-text">Implement <b>K-Means clustering from scratch</b> with NumPy to group Pokémon by their battle statistics. Filter rows using <code>Total &gt;= 500</code>, then cluster using <code>HP</code>, <code>Attack</code>, and <code>Defense</code>.</p>
+              <p class="card-text">Download <a download href="data/Pokemon.csv">Pokemon.csv</a> for the main tasks and <a download href="data/pokemon_cluster_subset.csv">pokemon_cluster_subset.csv</a> for optional exploration. Keep the data/ folder next to files/, or upload both CSVs to your Colab working directory.</p>
+              <p class="card-text">Use pandas for loading/filtering and NumPy for standardization and K-Means. Scikit-learn is allowed only for review demonstrations and the optional PCA visualization.</p>
+            </div>
+            <div class="card-footer text-muted">
+              End of Introduction
+            </div>
+          </div>
+
+          
+		  
+          <div class="card mb-4">      
+            <div class="card-body" id="assignment_tasks">
+              <h3 class="card-title">Lab Works</h3>
+              <p class="card-text">This lab consists of 4 main tasks, followed by an ungraded PCA visualization:</p>
+              <ul>
+                <li><b>Task 1: Load & Filter:</b> Filter Pokémon with Total &gt;= 500, select HP/Attack/Defense, and drop missing selected values.</li>
+                <li><b>Task 2: Standardize Features:</b> Use NumPy sample z-score standardization (ddof=1); map constant columns to zero.</li>
+                <li><b>Task 3: K-Means from Scratch:</b> Implement centroid initialization, label assignment, and centroid updates.</li>
+                <li><b>Task 4: Elbow Method:</b> Calculate inertia without loops and plot K=2 through 18 to discuss a reasonable K.</li>
+              </ul>
+              <p>Part 1: <a download href="files/lab4_review.ipynb">lab4_review.ipynb</a>. Part 2: <a download href="files/lab4_tasks.ipynb">lab4_tasks.ipynb</a>.</p>
+              <p class="card-text">Detailed descriptions and skeleton code are provided in the <a download href="./files/lab4_tasks.ipynb">lab4_tasks.ipynb</a> file.</p>
+            </div>
+            <div class="card-footer text-muted">
+              End of Lab Tasks
+            </div>
+          </div>
+
+      
+		  
+		  
+		  
+          <div class="card mb-4">
+            <div class="card-body" id="public-tests">
+              <h3 class="card-title">Public Test Cases and Expected Outputs</h3>
+              <p>Use these six examples to check your implementation before submitting. Run them in your completed task notebook after defining the required functions. Start with the imports below; each numbered example then defines its own input. These examples contain no hidden test data.</p>
+              <pre><code class="language-python">import numpy as np
+import pandas as pd</code></pre>
+              <p>The examples print lists to make the results easy to compare. Keep the function return types specified in the task: DataFrame, NumPy arrays, or a scalar. Grading checks return values rather than exact printed whitespace. Passing these examples does not guarantee that every hidden test will pass. Remove these checks from your submitted script or place them under <code>if __name__ == &quot;__main__&quot;:</code>.</p>
+              <h4 id="public-test-1">1. Load and filter the supplied CSV path</h4>
+              <p><b>Input and function calls:</b></p>
+              <pre><code class="language-python">from pathlib import Path
+from tempfile import TemporaryDirectory
+
+frame = pd.DataFrame([
+    [1, &quot;Alpha&quot;, &quot;Grass&quot;, &quot;Poison&quot;, 499, 45, 49, 49, 65, 65, 45, 1, False],
+    [2, &quot;Beta&quot;, &quot;Fire&quot;, &quot;&quot;, 520, 80, 120, 70, 95, 85, 100, 1, False],
+    [3, &quot;Gamma&quot;, &quot;Water&quot;, &quot;&quot;, 610, 90, 105, 95, 110, 90, 80, 1, False],
+    [4, &quot;Delta&quot;, &quot;Electric&quot;, &quot;Flying&quot;, 700, 70, np.nan, 60, 130, 75, 120, 1, False],
+], columns=[&quot;#&quot;, &quot;Name&quot;, &quot;Type 1&quot;, &quot;Type 2&quot;, &quot;Total&quot;, &quot;HP&quot;, &quot;Attack&quot;,
+            &quot;Defense&quot;, &quot;Sp. Atk&quot;, &quot;Sp. Def&quot;, &quot;Speed&quot;, &quot;Generation&quot;, &quot;Legendary&quot;])
+
+with TemporaryDirectory() as folder:
+    csv_path = Path(folder) / &quot;custom_pokemon.csv&quot;
+    frame.to_csv(csv_path, index=False)
+    result = load_n_filter(csv_path, [&quot;HP&quot;, &quot;Attack&quot;, &quot;Defense&quot;])
+
+print(list(result.columns))
+print(result.shape)
+print(result.to_numpy().tolist())</code></pre>
+              <p><b>Expected output:</b></p>
+              <pre><code class="language-none">[&#x27;HP&#x27;, &#x27;Attack&#x27;, &#x27;Defense&#x27;]
+(2, 3)
+[[80.0, 120.0, 70.0], [90.0, 105.0, 95.0]]</code></pre>
+              <p>Alpha is removed because Total is below 500. Delta is removed because Attack is missing. Beta and Gamma remain even though Type 2 is missing, because it is not a selected feature. Return a DataFrame in the requested column order. Integer and equivalent floating-point values are numerically equal; display formatting is not graded.</p>
+              <h4 id="public-test-2">2. Standardize using the sample standard deviation</h4>
+              <p><b>Input and function calls:</b></p>
+              <pre><code class="language-python">X = np.array([[1.0, 2.0, 3.0],
+              [3.0, 4.0, 7.0],
+              [5.0, 6.0, 11.0]])
+result = standardize(X)
+print(result.tolist())
+print(result.mean(axis=0).tolist())
+print(result.std(axis=0, ddof=1).tolist())</code></pre>
+              <p><b>Expected output:</b></p>
+              <pre><code class="language-none">[[-1.0, -1.0, -1.0], [0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]
+[0.0, 0.0, 0.0]
+[1.0, 1.0, 1.0]</code></pre>
+              <p>The public test checks the standardized values with np.testing.assert_allclose. It also checks column means against 0 and sample standard deviations against 1, with atol=1e-12. Use ddof=1 explicitly.</p>
+              <h4 id="public-test-3">3. Initialize centroids with a fixed random seed</h4>
+              <p><b>Input and function calls:</b></p>
+              <pre><code class="language-python">X = np.array([[0.0, 0.0], [1.0, 1.0],
+              [10.0, 10.0], [11.0, 11.0]])
+np.random.seed(7)
+centroids = initialize_centroids(X, 2)
+print(centroids.tolist())</code></pre>
+              <p><b>Expected output:</b></p>
+              <pre><code class="language-none">[[10.0, 10.0], [1.0, 1.0]]</code></pre>
+              <p>Reset the seed immediately before this call. Sampling two indices with np.random.choice(4, size=2, replace=False) selects indices [2, 1] for this example. The public test checks the selected rows and their order; do not reset the seed inside initialize_centroids.</p>
+              <h4 id="public-test-4">4. Assign labels and update centroids</h4>
+              <p><b>Input and function calls:</b></p>
+              <pre><code class="language-python">X = np.array([[0.0, 0.0], [1.0, 1.0],
+              [9.0, 9.0], [10.0, 10.0]])
+centroids = np.array([[0.0, 0.0], [10.0, 10.0]])
+labels = assign_labels(X, centroids)
+updated = update_centroids(X, labels, 2)
+print(labels.tolist())
+print(updated.tolist())</code></pre>
+              <p><b>Expected output:</b></p>
+              <pre><code class="language-none">[0, 0, 1, 1]
+[[0.5, 0.5], [9.5, 9.5]]</code></pre>
+              <p>The first two points belong to cluster 0 and the last two to cluster 1. Each updated centroid is the mean of its assigned points. Labels are compared exactly; centroids are compared with np.testing.assert_allclose.</p>
+              <h4 id="public-test-5">5. Run K-Means on two separated groups</h4>
+              <p><b>Input and function calls:</b></p>
+              <pre><code class="language-python">X = np.array([[0.0, 0.0], [0.2, -0.1],
+              [9.8, 10.1], [10.0, 9.9]])
+np.random.seed(42)
+centroids, labels = kmeans(X, 2, max_iter=20)
+print(centroids.shape)
+print(labels.shape)
+print(np.round(centroids, 6).tolist())
+print(labels.tolist())
+print(bool(labels[0] == labels[1]))
+print(bool(labels[2] == labels[3]))
+print(bool(labels[0] != labels[2]))</code></pre>
+              <p><b>Expected output (reference run):</b></p>
+              <pre><code class="language-none">(2, 2)
+(4,)
+[[0.1, -0.05], [9.9, 10.0]]
+[0, 0, 1, 1]
+True
+True
+True</code></pre>
+              <p>This is the reference result under the specified seed and algorithm. The public test checks the two output shapes and the three grouping conditions, not a fixed centroid order or cluster numbering. Swapping centroid rows together with their labels preserves the grouping. Any convergence-status message printed by kmeans is informational and is not graded. Rounding here is only for display; do not round intermediate calculations in your implementation.</p>
+              <h4 id="public-test-6">6. Compute inertia</h4>
+              <p><b>Input and function calls:</b></p>
+              <pre><code class="language-python">X = np.array([[0.0, 0.0], [1.0, 1.0],
+              [9.0, 9.0], [10.0, 10.0]])
+centroids = np.array([[0.5, 0.5], [9.5, 9.5]])
+labels = np.array([0, 0, 1, 1])
+inertia = compute_inertia(X, centroids, labels)
+print(float(inertia))</code></pre>
+              <p><b>Expected output:</b></p>
+              <pre><code class="language-none">2.0</code></pre>
+              <p>Each point contributes 0.5 to the squared-distance sum, so the total is 2.0. Return a scalar, not a distance matrix or a mean. The public test uses assertAlmostEqual with its default seven decimal places. The task also requires NumPy operations without loops or comprehensions.</p>
+            </div>
+            <div class="card-footer text-muted">End of Public Test Cases</div>
+          </div>
+
+          <div class="card mb-4">            
+            <div class="card-body" id="grading">
+              <h3 class="card-title">Submission &amp; Deadline</h3>
+              <ul>
+                <li><b>Deadline:</b> <span style="color:red">Friday, 23 October 2026, 23:59</span>.</li>
+                <li>This lab is worth <b>10 points</b>, assessed through the <a href="https://zinc.cse.ust.hk/">ZINC Online Submission System</a>.</li>
+                <li>Submit <code>lab4_tasks.py</code> directly to ZINC:
+                  <ol>
+                    <li>Complete <code>lab4_tasks.ipynb</code> and remove or comment out debugging code.</li>
+                    <li>In Colab, select <code>File</code> &rarr; <code>Download</code> &rarr; <code>Download .py</code>.</li>
+                    <li>Ensure the filename is exactly <code>lab4_tasks.py</code>.</li>
+                    <li>Drag the Python file into ZINC's submission panel. Do not submit a ZIP archive, notebook, or reference solution.</li>
+                  </ol>
+                </li>
+                <li>Keep demonstration data loading, printing, and plotting under <code>if __name__ == &quot;__main__&quot;:</code>. Preserve the required function names and signatures.</li>
+                <li>You may submit <b>up to 50 times</b> before the deadline. ZINC gives feedback after each submission. <b>Only the last submission is graded</b>, not the highest-scoring submission.</li>
+                <li><b>Time limit: 300 seconds per test case.</b> Exceeding it results in a timeout and <b>0 points for that test case</b>. Use NumPy vectorization where appropriate; <code>compute_inertia</code> must contain no loops or comprehensions.</li>
+              </ul>
+              <h4>Grading Scheme (10 points total)</h4>
+              <div class="table-responsive">
+                <table class="table table-bordered">
+                  <thead><tr><th scope="col">Task</th><th scope="col">Function</th><th scope="col">Points</th><th scope="col">Criteria</th></tr></thead>
+                  <tbody>
+                    <tr><td>Task 1: Load and filter</td><td><code>load_n_filter</code></td><td>2</td><td>CSV loading, Total &gt;= 500 filtering, requested feature order, and removal of missing selected values.</td></tr>
+                    <tr><td>Task 2: Standardize</td><td><code>standardize</code></td><td>1</td><td>Sample z-scores (ddof=1), including constant-feature handling.</td></tr>
+                    <tr><td>Task 3.1: Initialize centroids</td><td><code>initialize_centroids</code></td><td>1</td><td>Sample k distinct row indices using the specified random initialization.</td></tr>
+                    <tr><td>Task 3.2: Assign labels</td><td><code>assign_labels</code></td><td>1</td><td>Nearest-centroid assignment with the specified tie rule.</td></tr>
+                    <tr><td>Task 3.3: Update centroids</td><td><code>update_centroids</code></td><td>1</td><td>Cluster means and the specified empty-cluster handling.</td></tr>
+                    <tr><td>Task 3.4: K-Means loop</td><td><code>kmeans</code></td><td>1</td><td>Iteration, stopping rule, and final centroid/label consistency.</td></tr>
+                    <tr><td>Task 4.1: Inertia</td><td><code>compute_inertia</code></td><td>2</td><td>Correct sum of squared distances using NumPy without loops or comprehensions.</td></tr>
+                    <tr><td>Task 4.2: Compare K values</td><td><code>compute_all_inertias</code></td><td>1</td><td>Return 17 inertia values for K=2 through 18 in order.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p>Tasks 1&ndash;4 are worth <b>2 + 1 + 4 + 3 = 10 points</b>. The elbow plot and choice-of-K discussion support interpretation and carry no separate points. Task 5 (PCA visualization and exploration) is ungraded.</p>
+              <p>Hidden tests may use different datasets. Implement the required behavior rather than hard-coding the example results.</p>
+            </div>
+      <div class="card-footer text-muted">
+              End of Submission &amp; Deadline
+            </div>
+          </div>
+		  
+		  
+		  
+		  
+          <div class="card mb-4">            
+            <div class="card-body" id="faq">
+              <h3 class="card-title">Frequently Asked Questions</h3>
+                <p class="card-text">
+                    <b>Q:</b> Can I modify the provided skeleton code outside of the TODO?  
+                    <br>
+                    <b>A:</b> No, you are not encouraged to do so. Besides, if you add any code outside the function definition, you should either remove it for submission or put it under <code>if __name__ == &quot;__main__&quot;:</code>.
+                </p>
+                <p class="card-text">
+                  <b>Q</b>: Can I modify the numerical type of data in my code (e.g., change int to float32)?
+                    <br>
+                    <b>A</b>: Use floating-point arithmetic for standardization and means. Avoid reducing precision to float32 or rounding intermediate results; integer inputs must still yield floating-point results.
+                </p>
+                <p class="card-text">
+                  <b>Q</b>: How do I calculate movement between old and updated centroids?
+                    <br>
+                    <b>A</b>: Please use the L2-norm to calculate the differences between the old centroids and the updated ones.
+                </p>
+                <p class="card-text">
+                  <b>Q</b>: Should I update the centroids before breaking out of the loop when the convergence condition is met?
+                    <br>
+                    <b>A</b>: For this lab, retain the old centroids when all movements are below 0.01. Recompute labels from the final centroids before returning, even when the iteration limit is reached. For an empty cluster j, use X[j % n_samples], as specified in the notebook.
+                </p>
+            </div>
+		        <div class="card-footer text-muted">
+              End of Frequently Asked Questions
+            </div>          
+          </div>
+        </div>
+				
+        
+        <div class="col-md-3">
+		  <div class="sticky-top">
+            
+            <div class="card my-12">
+              <h5 class="card-header">Menu</h5>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-lg-12">
+                    <ul class="mb-0" type="circle" style="padding-left:20px">
+                      <li>
+                        <a href="#review">Review</a>
+                      </li>
+                      <li><a href="#introduction">Introduction</a>
+                      </li>
+                      <li>
+                        <a href="#assignment_tasks">Assignment Tasks</a>
+                      </li>
+                      
+			  		  <li>
+					    <a href="#public-tests">Public Test Cases</a>
+                      </li>
+                      <li>
+                        <a href="#grading">Submission &amp; Deadline</a>
+					  </li>
+					  <li>
+					    <a href="#faq">Frequently Asked Questions</a>
+					  </li>
+                    </ul>
+                  </div>                
+                </div>
+              </div>
+            </div>
+		  
+		    
+            <div class="card my-4">
+              <h5 class="card-header">Page maintained by</h5>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-lg-12">
+                    <ul class="list-unstyled mb-0">
+                      <li>
+                        CHEN, Yuxin
+                      </li>
+                      <li>
+                        Email: <a href="mailto:ychenqa@connect.ust.hk">ychenqa@connect.ust.hk</a>
+                      </li>
+		      <li>
+			CHEN, Ruiping
+		      </li>
+		      <li>
+                        Email: <a href="mailto:rchenbt@connect.ust.hk">rchenbt@connect.ust.hk</a>
+                      </li>
+		      <li><span style="color:rgb(0, 123, 255)">Last Modified: <script type="text/javascript">document.write(document.lastModified);</script> (Lab materials)</span></li>
+                    </ul>
+                  </div>				
+                </div>
+              </div>
+            </div>
+		  
+		  
+		    
+            <div class="card my-4">
+              <h5 class="card-header">Homepage</h5>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-lg-12">
+                    <ul class="list-unstyled mb-0">
+                      <li>
+                        <a href="http://course.cse.ust.hk/comp2211">Course Homepage</a>
+                      </li>
+                    </ul>
+                  </div>				
+                </div>
+              </div>
+            </div>
+		  </div>
+        </div>
+      </div>
+      
+
+    </div>
+    
+
+    
+    <footer class="py-5 bg-dark">
+      <div class="container">
+        <p class="m-0 text-center text-white">Maintained by COMP 2211 Teaching Team &copy; 2026 HKUST Computer Science and Engineering</p>
+      </div>
+      
+    </footer>
+
+    
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>	
+  </body>
+
+</html>
