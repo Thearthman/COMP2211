@@ -9,6 +9,55 @@ needed.
 **Legend:** `L2` = Lab 2, `L4` = Lab 4, `T` = task, `PA1` = TODO number.
 Methods present only in scaffold code are excluded.
 
+## Current Focus
+
+- Topic: Lab 6 speech-command MLP robustness
+- Goal: improve the speaker-held-out macro-F1 floor without changing the MFCC helper or required random split
+- Last updated: 2026-11-06
+
+## Concepts
+
+### Speaker-disjoint validation
+
+- Status: practicing
+- Meaning: keep every recording from a speaker on one side of a train/validation split.
+- Seen in: Lab 6 `GroupShuffleSplit(..., groups=speakers)` experiments.
+- Related methods: required `train_test_split`, `GroupShuffleSplit`, macro F1.
+- Minimal example: `next(GroupShuffleSplit(test_size=1/9).split(X, y, groups=speakers))`
+- Misconception to watch: a random split can look strong when the same speakers occur in both partitions.
+
+### Macro F1
+
+- Status: comfortable
+- Meaning: compute F1 per class, then take the unweighted mean so every command contributes equally.
+- Seen in: Lab 6 `MacroF1Score` and candidate comparisons.
+- Related methods: confusion matrix, precision, recall.
+- Minimal example: `f1_score(y_true, y_pred, average="macro")`
+- Misconception to watch: a strong mean can conceal a weak worst class or worst speaker fold.
+
+### Waveform augmentation
+
+- Status: introduced
+- Meaning: train on deterministic shifted, gain-scaled, and noisy copies before extracting the unchanged MFCC features.
+- Seen in: Lab 6 candidate scripts and augmented feature cache.
+- Related methods: MFCC extraction, regularization, speaker-disjoint validation.
+- Minimal example: extract MFCCs from both the original waveform and a 10 dB SNR noisy copy.
+- Misconception to watch: augmentation must be selected by speaker-held-out validation, not the leaky random split.
+
+### Probability-averaged MLP ensemble
+
+- Status: introduced
+- Meaning: average the softmax outputs of independently initialized or differently regularized MLP branches.
+- Seen in: Lab 6 three-branch candidate.
+- Related methods: dropout, weight averaging, macro F1.
+- Minimal example: `mean([branch(x, training=False) for branch in branches])`
+- Misconception to watch: ensemble gains are only credible when every member is evaluated on the same speaker-disjoint folds.
+
+## Next Reviews
+
+- [ ] Compare a single MLP and a three-member ensemble by worst-fold macro F1 on speaker-disjoint folds.
+- [ ] Report per-class F1 for `down`, `go`, `no`, and `right`, not only the mean.
+
 ## pandas
 
 | API | Source | Used pattern |

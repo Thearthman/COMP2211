@@ -62,6 +62,7 @@ from tensorflow import keras
 from tensorflow.keras import layers, optimizers, losses
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
+
 try:
     from IPython.display import Audio, display
 except ImportError:  # Allows the exported .py file to be imported by ZINC
@@ -255,6 +256,11 @@ class DataLoader:
         # NOTE: Store the data back to self.X_train, self.X_val, self.y_train, self.y_val
         ## =========================================================================
 
+        X_raw = np.array(X,dtype=np.float32)         # shape (7200, 26)
+        y_raw = np.array(y,dtype=int)                         # shape (7200,)
+        X_train, X_val, self.y_train, self.y_val = train_test_split(X_raw, y_raw, test_size=1/9, random_state=self.seed)
+        self.X_train = (X_train - X_train.mean(axis=0)) / (X_train.std(axis=0,ddof=0) + 1e-8)
+        self.X_val = (X_val - X_train.mean(axis=0)) / (X_train.std(axis=0,ddof=0) + 1e-8)
 
 
 
@@ -271,7 +277,10 @@ class DataLoader:
         # 2. Pair self.X_val with self.y_val as a TensorFlow dataset
         # 3. Batch both datasets using self.batch_size
         ## ========================================================================
-
+        train = tf.data.Dataset.from_tensor_slices((self.X_train,self.y_train)).shuffle(buffer_size=len(self.X_train),seed=self.seed)
+        val = tf.data.Dataset.from_tensor_slices((self.X_val,self.y_val)).shuffle(buffer_size=len(self.X_train),seed=self.seed)
+        train = train.batch(self.batch_size)
+        val = val.batch(self.batch_size)
 
         return train, val
 
@@ -398,7 +407,41 @@ class SpeechRecognizer(tf.keras.Model):
         # Build your model. The architecture is arbitrary, no standard answer
         # =====================================================================
         super().__init__()
-
+        self.branch_models = [
+            tf.keras.Sequential(
+                [
+                    tf.keras.layers.Dense(192),
+                    tf.keras.layers.Activation("relu"),
+                    tf.keras.layers.Dropout(0.30),
+                    tf.keras.layers.Dense(96),
+                    tf.keras.layers.Activation("relu"),
+                    tf.keras.layers.Dropout(0.15),
+                    tf.keras.layers.Dense(num_classes, activation="softmax"),
+                ],
+                name="branch_0",
+            ),
+            tf.keras.Sequential(
+                [
+                    tf.keras.layers.Dense(192),
+                    tf.keras.layers.Activation("relu"),
+                    tf.keras.layers.Dropout(0.40),
+                    tf.keras.layers.Dense(num_classes, activation="softmax"),
+                ],
+                name="branch_1",
+            ),
+            tf.keras.Sequential(
+                [
+                    tf.keras.layers.Dense(192),
+                    tf.keras.layers.Activation("relu"),
+                    tf.keras.layers.Dropout(0.40),
+                    tf.keras.layers.Dense(96),
+                    tf.keras.layers.Activation("relu"),
+                    tf.keras.layers.Dropout(0.20),
+                    tf.keras.layers.Dense(num_classes, activation="softmax"),
+                ],
+                name="branch_2",
+            ),
+        ]
 
     def call(self, inputs: tf.Tensor, training: bool = False) -> tf.Tensor:
         """
@@ -414,9 +457,10 @@ class SpeechRecognizer(tf.keras.Model):
         # TODO ================================================================
         # Build your data flow inside the model. Use the structure above
         # =====================================================================
-
-
-        return outputs
+        probabilities = [
+            branch(inputs, training=training) for branch in self.branch_models
+        ]
+        return tf.reduce_mean(tf.stack(probabilities, axis=0), axis=0)
 
 """## Task 3: Customized F1 Metric Implementation
 
@@ -490,7 +534,9 @@ class MacroF1Score(tf.keras.metrics.Metric):
         # 3. Add this batch confusion matrix to the stored epoch confusion matrix using `assign_add`
         # NOTE: Data type of your batch confusion matrix should be tf.float32
         # =================================================================================================
-
+        y_pred_class = tf.math.argmax(y_pred,axis=1)
+        batch_cm = tf.math.confusion_matrix(y_true,y_pred_class,num_classes=self.num_classes,weights=sample_weight)
+        self.cm.assign_add(batch_cm)
 
     def result(self) -> tf.Tensor:
         """
@@ -507,7 +553,13 @@ class MacroF1Score(tf.keras.metrics.Metric):
         # 5. Return the average F1 score across all classes
         # NOTE: Retrieve values from `self.cm`
         # =========================================================================
-
+        TP = tf.linalg.diag_part(self.cm)
+        FP_TP = tf.reduce_sum(self.cm,axis=0) + 1e-8
+        FN_TP = tf.reduce_sum(self.cm,axis=1) + 1e-8
+        precision = TP / FP_TP
+        recall = TP/ FN_TP
+        f1 = 2 * precision * recall / (precision + recall + 1e-8)
+        macro_f1 = tf.reduce_mean(f1)
 
         return macro_f1
 
@@ -634,11 +686,12 @@ if __name__ == '__main__':
     # 1. Instantiate a model
     # 2. Compile the model using appropriate optimizer, learning rate, loss function and metrics
     # ==========================================================================================
-    model = SpeechRecognizer(input_dim=_, num_classes=_)
+    num_classes = int(tf.reduce_max(labels)+1)
+    model = SpeechRecognizer(input_dim=data_loader.X_train.shape[1], num_classes=num_classes)
     model.compile(
-        optimizer=_,
+        optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3),
         loss=losses.SparseCategoricalCrossentropy(),
-        metrics=[MacroF1Score(num_classes=_)],
+        metrics=[MacroF1Score(num_classes=num_classes)],
     )
 
     # ===================================================
@@ -651,10 +704,20 @@ if __name__ == '__main__':
     # TODO =====================================================================================
     # 3. Fit the model and start training (use the training batch `train` defined above)
     # ==========================================================================================
+    checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+            filepath="myguy.weights.h5",
+            monitor="val_f1_score",
+            save_best_only=True,
+            save_weights_only=True,
+            mode="max",
+            )
+
     history = model.fit(
-        _,
-        validation_data=_,
-        epochs=_,
+        train,
+        validation_data=val,
+        epochs=50,
+        shuffle=False,
+        callbacks=[checkpoint_callback]
     )
 
 """## Evaluation
@@ -663,6 +726,7 @@ After training, you can run the following code to check the model's validation p
 """
 
 if __name__ == '__main__':
+    model.load_weights("myguy.weights.h5")
     # Final evaluation
     val_loss, val_f1 = model.evaluate(val)
     print("Validation loss:", val_loss)
