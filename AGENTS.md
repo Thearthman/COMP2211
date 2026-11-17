@@ -1,22 +1,25 @@
 <!-- FOR AI AGENTS - Human readability is a side effect, not a goal -->
 <!-- Managed by agent: keep sections and order; edit content, not structure -->
-<!-- Last updated: 2026-10-07 | Last verified: 2026-10-07 -->
+<!-- Last updated: 2026-11-05 | Last verified: 2026-11-05 -->
 
 # AGENTS.md
 
 **Precedence:** the closest `AGENTS.md` to the files you change wins; this root file is the repo-wide default.
 
-## Environment: NixOS + `nix develop` — READ BEFORE RUNNING PYTHON
+## Environment: Nix flake + `nix develop` — READ BEFORE RUNNING PYTHON
 
 Python and all dependencies come from the flake (`flake.nix`, built with uv2nix) — **not**
 the system interpreter and **not** a `pip`/`uv run` virtualenv.
 
 | Fact | Value |
 |------|-------|
-| Interpreter | nix-provided `python` (CPython 3.14.7) |
-| pandas / numpy | `3.0.6` / `2.5.3` (from the nix store) |
-| Shell entry | `nix develop`; `direnv` also auto-loads via `.envrc` (`use flake`) |
+| Interpreter | nix-provided `python` (CPython 3.13.15) |
+| pandas / numpy | `3.1.1` / `2.5.4` (from the nix store) |
+| Shell entry | `nix develop`; `direnv` auto-loads via `.envrc` (fish and bash hooks are configured) |
 | Runtime | the shell exposes a ready virtualenv — just call `python` |
+| Non-NixOS hosts | `~/.local/bin/nix` uses native Nix when present, otherwise the rootless `nix-portable` fallback |
+| Rootless direnv | `.envrc` exposes flake command shims because `nix-portable` virtualizes `/nix/store`; native Nix hosts use `use flake` directly |
+| Python watcher | the dev-shell hook runs edited `*.py` files in eligible empty terminals; rootless `.envrc` also enters that hook |
 
 Scripts read their `*.csv` by relative path, so run from the data's directory:
 
@@ -35,11 +38,11 @@ One-shot from the repo root: `nix develop -c sh -c 'cd lab2 && python lab2_tasks
   `ImportError: libstdc++.so.6: cannot open shared object file`.
 - The system `python3` has no pandas/numpy; `pip` into it is unmanaged.
 
-## Commands (verified 2026-10-07)
+## Commands (verified 2026-11-05)
 | Task | Command |
 |------|---------|
 | Enter shell | `nix develop` (or let `direnv` auto-load) |
-| Versions | `python -c "import pandas,numpy;print(pandas.__version__,numpy.__version__)"` -> `3.0.6 2.5.3` |
+| Versions | `python -c "import pandas,numpy;print(pandas.__version__,numpy.__version__)"` -> `3.1.1 2.5.4` |
 | Run lab2 | `nix develop -c sh -c 'cd lab2 && python lab2_tasks.py'` |
 
 > No `pytest`/`ruff`/`mypy`/`jupyter`/`ipython` are installed — don't invent those commands.

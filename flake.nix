@@ -37,9 +37,27 @@
 
       workspace = uv2nix.lib.workspace.loadWorkspace { workspaceRoot = ./.; };
 
-      overlay = workspace.mkPyprojectOverlay {
-        sourcePreference = "wheel";
-      };
+      overlay = lib.composeManyExtensions [
+        (workspace.mkPyprojectOverlay {
+          sourcePreference = "wheel";
+        })
+        (final: prev:
+          # NVIDIA wheels dlopen their sibling libraries and the host driver at
+          # runtime; LD_LIBRARY_PATH is populated by the dev-shell hook below.
+          let
+            nvidiaPackages = builtins.filter
+              (name: lib.hasPrefix "nvidia-" name)
+              (builtins.attrNames prev);
+          in
+          builtins.listToAttrs (map
+            (name: {
+              inherit name;
+              value = prev.${name}.overrideAttrs (_: {
+                autoPatchelfIgnoreMissingDeps = true;
+              });
+            })
+            nvidiaPackages))
+      ];
 
       editableOverlay = workspace.mkEditablePyprojectOverlay {
         root = "$REPO_ROOT";
@@ -75,6 +93,7 @@
           default = pkgs.mkShell {
             packages = [
               virtualenv
+              pkgs.basedpyright
               pkgs.uv
               pkgs.watchexec
               pkgs.gnugrep
@@ -88,15 +107,48 @@
             shellHook = ''
               unset PYTHONPATH
               export REPO_ROOT=$(git rev-parse --show-toplevel)
+
+              # TensorFlow dlopen()s CUDA/cuDNN instead of linking them, so the
+              # NVIDIA wheel libraries and the host driver must be discoverable.
+              _tf_site_packages="$(
+                python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])'
+              )"
+              _tf_cuda_libs=""
+              while IFS= read -r -d "" _lib_dir; do
+                _tf_cuda_libs="''${_tf_cuda_libs:+$_tf_cuda_libs:}$_lib_dir"
+              done < <(find -L "$_tf_site_packages/nvidia" -type d -name lib -print0 2>/dev/null)
+              _driver_lib="$(
+                find /run/opengl-driver/lib /usr/lib /lib \
+                  -name libcuda.so.1 -print -quit 2>/dev/null
+              )"
+              if [ -n "$_driver_lib" ]; then
+                _driver_dir="$REPO_ROOT/.direnv/nvidia-driver"
+                mkdir -p "$_driver_dir"
+                for _name in libcuda.so.1 libnvidia-ml.so.1 libnvidia-ptxjitcompiler.so.1; do
+                  _src="$(dirname "$_driver_lib")/$_name"
+                  [ -e "$_src" ] && ln -sfn "$_src" "$_driver_dir/$_name"
+                done
+                _tf_cuda_libs="$_driver_dir''${_tf_cuda_libs:+:$_tf_cuda_libs}"
+              fi
+              if [ -n "$_tf_cuda_libs" ]; then
+                export LD_LIBRARY_PATH="$_tf_cuda_libs''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+              fi
+              # TensorFlow only ships PTX for sm_90; let XLA use the CUDA
+              # package's matching ptxas/libdevice when JIT-compiling for sm_120.
+              export XLA_FLAGS="--xla_gpu_cuda_data_dir=$_tf_site_packages/nvidia/cuda_nvcc''${XLA_FLAGS:+ $XLA_FLAGS}"
+              unset _tf_site_packages _tf_cuda_libs _lib_dir _driver_lib _driver_dir _name _src
+
               PY_WATCH_TTY="$(ps -o tty= -p $$ 2>/dev/null | tr -d '[:space:]')"
               PY_WATCH_TTY_DEVICE=""
               PY_WATCH_PID_FILE=""
+              PY_WATCH_ENV_FILE=""
               PY_WATCH_SHELL_PID=""
               PY_WATCH_TERMINAL_FREE=0
               if [ -n "$PY_WATCH_TTY" ] && [ "$PY_WATCH_TTY" != "?" ]; then
                 PY_WATCH_TTY_DEVICE="/dev/$PY_WATCH_TTY"
                 PY_WATCH_TTY_SLUG="''${PY_WATCH_TTY//\//_}"
                 PY_WATCH_PID_FILE="$REPO_ROOT/.direnv/python-watcher.$PY_WATCH_TTY_SLUG.pid"
+                PY_WATCH_ENV_FILE="$PY_WATCH_PID_FILE.env"
                 PY_WATCH_SHELL_PID="$(
                   ps -t "$PY_WATCH_TTY" -o pid=,comm= 2>/dev/null |
                     awk '$2 == "fish" || $2 == "zsh" || $2 == "bash" || $2 == "nu" { print $1; exit }'
@@ -108,11 +160,53 @@
                 fi
               fi
               PY_WATCH_PID="$(cat "$PY_WATCH_PID_FILE" 2>/dev/null || true)"
+              case "$PY_WATCH_PID" in
+                "" | *[!0-9]*) PY_WATCH_PID="" ;;
+              esac
+              PY_WATCH_EXPECTED_ENV=""
+              if [ -n "$PY_WATCH_ENV_FILE" ]; then
+                PY_WATCH_EXPECTED_ENV="$(
+                  printf 'LD_LIBRARY_PATH=%s\nXLA_FLAGS=%s\n' \
+                    "$LD_LIBRARY_PATH" "$XLA_FLAGS"
+                )"
+              fi
+              PY_WATCH_STALE=0
+              if [ -n "$PY_WATCH_PID" ] && kill -0 "$PY_WATCH_PID" 2>/dev/null; then
+                if ! tr '\0' ' ' < "/proc/$PY_WATCH_PID/cmdline" 2>/dev/null |
+                  grep -Fq "$PY_WATCH_PID_FILE"
+                then
+                  # The PID was reused by an unrelated process.
+                  PY_WATCH_PID=""
+                  unlink "$PY_WATCH_PID_FILE" 2>/dev/null || true
+                  unlink "$PY_WATCH_ENV_FILE" 2>/dev/null || true
+                else
+                  # A watcher inherited the shell environment when it started.
+                  # Reusing one after a flake/env reload would run Python without
+                  # the current NVIDIA wheel paths, so replace it when stale.
+                  PY_WATCH_LIVE_ENV="$(cat "$PY_WATCH_ENV_FILE" 2>/dev/null || true)"
+                  if [ "$PY_WATCH_LIVE_ENV" != "$PY_WATCH_EXPECTED_ENV" ]; then
+                    PY_WATCH_STALE=1
+                  fi
+                fi
+              fi
               if [ "$PY_WATCH_TERMINAL_FREE" = 1 ] && [ -w "$PY_WATCH_TTY_DEVICE" ] &&
-                { [ -z "$PY_WATCH_PID" ] || ! kill -0 "$PY_WATCH_PID" 2>/dev/null; }
+                { [ -z "$PY_WATCH_PID" ] ||
+                  ! kill -0 "$PY_WATCH_PID" 2>/dev/null ||
+                  [ "$PY_WATCH_STALE" = 1 ]; }
               then
                 mkdir -p "$REPO_ROOT/.direnv"
                 PY_WATCH_LOG="$REPO_ROOT/.direnv/python-watcher.$PY_WATCH_TTY_SLUG.log"
+                if [ -n "$PY_WATCH_PID" ] && kill -0 "$PY_WATCH_PID" 2>/dev/null; then
+                  kill "$PY_WATCH_PID" 2>/dev/null || true
+                  for _ in 1 2 3 4 5 6 7 8 9 10; do
+                    kill -0 "$PY_WATCH_PID" 2>/dev/null || break
+                    sleep 0.1
+                  done
+                  kill -KILL "$PY_WATCH_PID" 2>/dev/null || true
+                  unlink "$PY_WATCH_PID_FILE" 2>/dev/null || true
+                  unlink "$PY_WATCH_ENV_FILE" 2>/dev/null || true
+                fi
+                printf '%s\n' "$PY_WATCH_EXPECTED_ENV" > "$PY_WATCH_ENV_FILE"
                 TMPDIR="''${XDG_RUNTIME_DIR:-/tmp}" setsid -f bash -c '
                   for fd in /proc/$$/fd/*; do
                     fd="''${fd##*/}"
@@ -131,6 +225,7 @@
                     kill "$watcher" 2>/dev/null || true
                     wait "$watcher" 2>/dev/null || true
                     unlink "$pid_file" 2>/dev/null || true
+                    unlink "$pid_file.env" 2>/dev/null || true
                     if [ -n "$shell_pid" ]; then
                       kill -WINCH "$shell_pid" 2>/dev/null || true
                     fi
@@ -193,8 +288,9 @@
                     ' watcher-shell "$PY_WATCH_TTY" "$PY_WATCH_TTY_DEVICE" "$PY_WATCH_SHELL_PID" \
                     </dev/null >/dev/null 2>>"$PY_WATCH_LOG"
               fi
-              unset PY_WATCH_PID_FILE PY_WATCH_PID PY_WATCH_TTY PY_WATCH_TTY_DEVICE
-              unset PY_WATCH_TTY_SLUG PY_WATCH_SHELL_PID PY_WATCH_TERMINAL_FREE PY_WATCH_LOG
+              unset PY_WATCH_PID_FILE PY_WATCH_ENV_FILE PY_WATCH_PID PY_WATCH_TTY PY_WATCH_TTY_DEVICE
+              unset PY_WATCH_TTY_SLUG PY_WATCH_SHELL_PID PY_WATCH_TERMINAL_FREE
+              unset PY_WATCH_STALE PY_WATCH_LIVE_ENV PY_WATCH_EXPECTED_ENV PY_WATCH_LOG
             '';
           };
         }
