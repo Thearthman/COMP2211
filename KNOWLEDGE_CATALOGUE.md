@@ -11,11 +11,47 @@ Methods present only in scaffold code are excluded.
 
 ## Current Focus
 
-- Topic: Lab 6 speech-command MLP robustness
-- Goal: improve the speaker-held-out macro-F1 floor without changing the MFCC helper or required random split
-- Last updated: 2026-11-06
+- Topic: Lab 8 CNN pet foreground segmentation
+- Goal: understand the encoder-decoder flow, spatial resolution versus feature channels, and how the network produces a binary segmentation mask
+- Last updated: 2026-11-17
 
 ## Concepts
+
+### Upsampling in segmentation decoders
+
+- Status: introduced
+- Meaning: increase a feature map's height and width so a CNN can return from pooled feature maps to a full-resolution prediction.
+- Seen in: Lab 8 `UpSampling2D` in the decoder before the final `128 x 128` mask.
+- Related methods: `MaxPooling2D`, `Conv2D`, nearest-neighbor interpolation, bilinear interpolation, transposed convolution.
+- Minimal example: default `UpSampling2D(size=(2, 2))` maps `[[1, 2], [3, 4]]` to a `4 x 4` grid, repeating each value in a `2 x 2` block.
+- Misconception to watch: `size=(2, 2)` multiplies height and width by two rather than adding two; channels stay unchanged. Keras's default nearest-neighbor upsampling also performs no interpolation or learned calculation; it copies values, and later convolutions do the learned refinement.
+
+### Binary target versus probability mask
+
+- Status: introduced
+- Meaning: the training target contains hard values in `{0, 1}`, while the final sigmoid layer produces a foreground probability in `[0, 1]`; thresholding converts that probability map into a binary prediction.
+- Seen in: Lab 8 mask preprocessing, `BinaryCrossentropy`, and foreground IoU thresholding.
+- Related methods: sigmoid activation, binary cross-entropy, thresholding, IoU.
+- Minimal example: sigmoid probabilities `[0.1, 0.8]` become `[0, 1]` with a `0.5` threshold.
+- Misconception to watch: a sigmoid does not normally output exact `0` or `1`; the raw network output is a continuous probability map.
+
+### Feature channels versus spatial dimensions
+
+- Status: introduced
+- Meaning: a tensor `(batch, H, W, C)` has `H x W` spatial positions and `C` feature channels; a `Conv2D` layer's `filters` argument sets the next tensor's channel count.
+- Seen in: Lab 8 encoder-decoder feature maps and the final one-filter segmentation convolution.
+- Related methods: `Conv2D`, `UpSampling2D`, `MaxPooling2D`, the final `1 x 1` convolution with sigmoid.
+- Minimal example: `(8, 8, 8, 16) --Conv2D(32, 3)--> (8, 8, 8, 32)`; each new channel combines all 16 input channels over a local window.
+- Misconception to watch: filter outputs are connected feature channels, not independent candidate images. The final layer controls mask classes through its number of filters, not through its spatial size.
+
+### Convolution padding and shape control
+
+- Status: introduced
+- Meaning: `padding="same"` adds border values, usually zeros, so a stride-one convolution preserves height and width; `padding="valid"` adds nothing and keeps only positions where the whole kernel fits.
+- Seen in: shape tracking for Lab 8 encoder and decoder `Conv2D` layers.
+- Related methods: `Conv2D` `kernel_size`, `stride`, and `filters`; `MaxPooling2D`; `UpSampling2D`.
+- Minimal example: `(128, 128, 3) --Conv2D(32, 3, padding="same")--> (128, 128, 32)`, while `padding="valid"` gives `(126, 126, 32)`.
+- Misconception to watch: padding controls spatial height and width, while `filters` controls output channels. Keras `Conv2D` defaults to `padding="valid"`, not `"same"`.
 
 ### Speaker-disjoint validation
 
@@ -55,6 +91,10 @@ Methods present only in scaffold code are excluded.
 
 ## Next Reviews
 
+- [ ] Predict the shape and values produced by default `UpSampling2D((2, 2))` on a small `2 x 2` feature map.
+- [ ] Explain why a binary segmentation target still uses sigmoid probabilities and thresholding instead of exact `0`/`1` activations.
+- [ ] Track a decoder feature map from `32 x 32 x 64` to `64 x 64 x 1` and identify which layer changes resolution and which changes channels.
+- [ ] Compare the output shapes of `Conv2D(16, 3)` with `padding="same"` and `padding="valid"` for a `32 x 32 x 64` input.
 - [ ] Compare a single MLP and a three-member ensemble by worst-fold macro F1 on speaker-disjoint folds.
 - [ ] Report per-class F1 for `down`, `go`, `no`, and `right`, not only the mean.
 
