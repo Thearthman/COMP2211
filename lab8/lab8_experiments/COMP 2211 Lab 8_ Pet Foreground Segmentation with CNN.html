@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en" data-darkreader-mode="dynamic" data-darkreader-scheme="dark"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"><style class="darkreader darkreader--root-vars" media="screen"></style><style class="darkreader darkreader--variables" media="screen">:root {
+   --darkreader-neutral-background: var(--darkreader-background-ffffff, #181a1b);
+   --darkreader-neutral-text: var(--darkreader-text-000000, #e8e6e3);
+   --darkreader-selection-background: var(--darkreader-background-0060d4, #004daa);
+   --darkreader-selection-text: var(--darkreader-text-ffffff, #e8e6e3);
+}</style><style class="darkreader darkreader--inline" media="screen">[data-darkreader-inline-bgcolor] {
+  background-color: var(--darkreader-inline-bgcolor) !important;
+}
+[data-darkreader-inline-bgimage] {
+  background-image: var(--darkreader-inline-bgimage) !important;
+}
+[data-darkreader-inline-border] {
+  border-color: var(--darkreader-inline-border) !important;
+}
+[data-darkreader-inline-border-bottom] {
+  border-bottom-color: var(--darkreader-inline-border-bottom) !important;
+}
+[data-darkreader-inline-border-left] {
+  border-left-color: var(--darkreader-inline-border-left) !important;
+}
+[data-darkreader-inline-border-right] {
+  border-right-color: var(--darkreader-inline-border-right) !important;
+}
+[data-darkreader-inline-border-top] {
+  border-top-color: var(--darkreader-inline-border-top) !important;
+}
+[data-darkreader-inline-boxshadow] {
+  box-shadow: var(--darkreader-inline-boxshadow) !important;
+}
+[data-darkreader-inline-color] {
+  color: var(--darkreader-inline-color) !important;
+}
+[data-darkreader-inline-fill] {
+  fill: var(--darkreader-inline-fill) !important;
+}
+[data-darkreader-inline-stroke] {
+  stroke: var(--darkreader-inline-stroke) !important;
+}
+[data-darkreader-inline-outline] {
+  outline-color: var(--darkreader-inline-outline) !important;
+}
+[data-darkreader-inline-stopcolor] {
+  stop-color: var(--darkreader-inline-stopcolor) !important;
+}
+[data-darkreader-inline-bg] {
+  background: var(--darkreader-inline-bg) !important;
+}
+[data-darkreader-inline-border-short] {
+  border: var(--darkreader-inline-border-short) !important;
+}
+[data-darkreader-inline-border-bottom-short] {
+  border-bottom: var(--darkreader-inline-border-bottom-short) !important;
+}
+[data-darkreader-inline-border-left-short] {
+  border-left: var(--darkreader-inline-border-left-short) !important;
+}
+[data-darkreader-inline-border-right-short] {
+  border-right: var(--darkreader-inline-border-right-short) !important;
+}
+[data-darkreader-inline-border-top-short] {
+  border-top: var(--darkreader-inline-border-top-short) !important;
+}
+[data-darkreader-inline-invert] {
+    filter: invert(100%) hue-rotate(180deg);
+}</style><style class="darkreader darkreader--invert" media="screen">c-wiz div > svg > circle, .jfk-bubble.gtx-bubble, .captcheck_answer_label > input + img, span#closed_text > img[src^="https://www.gstatic.com/images/branding/googlelogo"], span[data-href^="https://www.hcaptcha.com/"] > #icon, img.Wirisformula, a[data-testid="headerMediumLogo"]>svg, .d2l-navigation-link-image-container, .d2l-iframe-loading-container, div.mc-ip-hide[style*="background: rgb(255, 255, 255) !important"], [style*="color: rgb(0, 0, 1) !important;"] {
+    filter: invert(100%) hue-rotate(180deg) contrast(90%) !important;
+}</style><style class="darkreader darkreader--text" media="screen"></style><style class="darkreader darkreader--user-agent" media="screen">@layer darkreader {
+html {
+    background-color: var(--darkreader-background-ffffff, #181a1b) !important;
+}
+html {
+    color-scheme: dark !important;
+}
+iframe {
+    color-scheme: dark !important;
+}
+html, body {
+    background-color: var(--darkreader-background-ffffff, #181a1b);
+}
+html, body {
+    border-color: var(--darkreader-border-4c4c4c, #736b5e);
+    color: var(--darkreader-text-000000, #e8e6e3);
+}
+a {
+    color: var(--darkreader-text-0040ff, #3391ff);
+}
+table {
+    border-color: var(--darkreader-border-808080, #545b5e);
+}
+mark {
+    color: var(--darkreader-text-000000, #e8e6e3);
+}
+::placeholder {
+    color: var(--darkreader-text-a9a9a9, #b2aba1);
+}
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+    background-color: var(--darkreader-background-faffbd, #404400) !important;
+    color: var(--darkreader-text-000000, #e8e6e3) !important;
+}
+::selection {
+    background-color: var(--darkreader-background-0060d4, #004daa) !important;
+    color: var(--darkreader-text-ffffff, #e8e6e3) !important;
+}
+::-moz-selection {
+    background-color: var(--darkreader-background-0060d4, #004daa) !important;
+    color: var(--darkreader-text-ffffff, #e8e6e3) !important;
+}
+}</style><style class="darkreader darkreader--fallback" media="screen"></style><style class="darkreader darkreader-layers" media="screen">@layer darkreader</style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="COMP 2211 Lab 8: Pet Foreground Segmentation with a Convolutional Neural Network">
+    <title>COMP 2211 Lab 8: Pet Foreground Segmentation with CNN</title>
+
+    <style>
+      :root {
+        --ink: #1b2430;
+        --muted: #5f6874;
+        --line: #d9e0e8;
+        --panel: #ffffff;
+        --bg: #f5f7fb;
+        --course: #163b72;
+        --accent: #7a1f6a;
+        --teal: #1d817c;
+        --soft-teal: #e9f6f4;
+        --soft-gold: #fff5df;
+        --soft-purple: #f6edf6;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--bg);
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 1.58;
+      }
+
+      a {
+        color: #175ca8;
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      code {
+        padding: 0.12rem 0.3rem;
+        border: 1px solid #d5dbe4;
+        border-radius: 4px;
+        background: #f7f8fb;
+        color: #8a275f;
+        font-size: 0.95em;
+      }
+
+      .page {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 32px 22px 48px;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 280px;
+        gap: 28px;
+        align-items: start;
+      }
+
+      .hero {
+        position: relative;
+        overflow: hidden;
+        min-height: 360px;
+        border: 1px solid #cfd8e3;
+        background: #102033;
+        color: #ffffff;
+      }
+
+      .hero img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.13;
+      }
+
+      .hero-content {
+        position: relative;
+        max-width: 780px;
+        padding: 42px;
+      }
+
+      .course-label {
+        display: inline-block;
+        margin-bottom: 18px;
+        padding: 5px 10px;
+        border: 1px solid rgba(255, 255, 255, 0.55);
+        color: #f4f9ff;
+        font-size: 0.86rem;
+        letter-spacing: 0;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4 {
+        margin: 0;
+        line-height: 1.2;
+      }
+
+      h1 {
+        max-width: 740px;
+        font-size: 2.45rem;
+        font-weight: 700;
+      }
+
+      .subtitle {
+        max-width: 700px;
+        margin: 18px 0 24px;
+        color: #e8eef6;
+        font-size: 1.04rem;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 9px 15px;
+        border: 1px solid #ffffff;
+        background: #ffffff;
+        color: #102033;
+        font-weight: 700;
+      }
+
+      .button.secondary {
+        background: rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+      }
+
+      .content > section {
+        margin-top: 24px;
+      }
+
+      .section {
+        border: 1px solid var(--line);
+        background: var(--panel);
+      }
+
+      .section-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .section-header h2 {
+        color: var(--course);
+        font-size: 1.35rem;
+      }
+
+      .section-body {
+        padding: 22px 24px 24px;
+      }
+
+      .section-body p:first-child {
+        margin-top: 0;
+      }
+
+      .section-body p:last-child {
+        margin-bottom: 0;
+      }
+
+      .topic-list {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin: 18px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .topic-list li {
+        border-left: 4px solid var(--teal);
+        background: var(--soft-teal);
+        padding: 10px 12px;
+      }
+
+      .dataset-table {
+        width: 100%;
+        margin-top: 16px;
+        border-collapse: collapse;
+        font-size: 0.96rem;
+      }
+
+      .dataset-table th,
+      .dataset-table td {
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      .dataset-table th {
+        background: #eef3f8;
+        color: #22334a;
+      }
+
+      .task-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .task-card {
+        min-height: 178px;
+        padding: 18px;
+        border: 1px solid var(--line);
+        background: #ffffff;
+      }
+
+      .task-number {
+        color: var(--accent);
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+      }
+
+      .task-card h3 {
+        margin-top: 6px;
+        color: #203247;
+        font-size: 1.08rem;
+      }
+
+      .task-card p {
+        margin: 10px 0 0;
+        color: var(--muted);
+      }
+
+      .download-strip {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 18px;
+      }
+
+      .download-box {
+        padding: 16px;
+        border: 1px solid #d8d0a8;
+        background: var(--soft-gold);
+      }
+
+      .download-box strong {
+        display: block;
+        color: #6b4300;
+      }
+
+      .submission-list {
+        margin: 0;
+        padding-left: 21px;
+      }
+
+      .submission-list li + li {
+        margin-top: 12px;
+      }
+
+      .thresholds {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .threshold {
+        padding: 13px;
+        border: 1px solid #d9c7dc;
+        background: var(--soft-purple);
+      }
+
+      .threshold strong {
+        display: block;
+        color: var(--accent);
+      }
+
+      .sidebar {
+        position: sticky;
+        top: 20px;
+      }
+
+      .side-box {
+        border: 1px solid var(--line);
+        background: #ffffff;
+      }
+
+      .side-box + .side-box {
+        margin-top: 16px;
+      }
+
+      .side-title {
+        padding: 13px 16px;
+        border-bottom: 1px solid var(--line);
+        background: #eef3f8;
+        color: #23364d;
+        font-weight: 700;
+      }
+
+      .side-body {
+        padding: 14px 16px;
+      }
+
+      .side-body ul {
+        margin: 0;
+        padding-left: 18px;
+      }
+
+      .side-body li + li {
+        margin-top: 8px;
+      }
+
+      .meta-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .meta-list li + li {
+        margin-top: 8px;
+      }
+
+      footer {
+        margin-top: 34px;
+        padding: 28px 16px;
+        background: #1d2430;
+        color: #ffffff;
+        text-align: center;
+      }
+
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          position: static;
+        }
+      }
+
+      @media (max-width: 680px) {
+        .page {
+          padding: 18px 14px 34px;
+        }
+
+        .hero-content {
+          padding: 30px 22px;
+        }
+
+        h1 {
+          font-size: 1.82rem;
+        }
+
+        .topic-list,
+        .task-grid,
+        .download-strip,
+        .thresholds {
+          grid-template-columns: 1fr;
+        }
+
+        .section-header,
+        .section-body {
+          padding-left: 18px;
+          padding-right: 18px;
+        }
+      }
+      .dataset-table { table-layout: fixed; }
+      .dataset-table th, .dataset-table td { overflow-wrap: anywhere; }
+    </style><style class="darkreader darkreader--sync" media="screen"></style>
+  <meta name="darkreader" content="2f60cbcf6c674720bf84403d1cbe2ef1"><style class="darkreader darkreader--override" media="screen">c-wiz div {
+    --action-items-action-item-background-color: var(--darkreader-neutral-background) !important;
+}
+.jfk-bubble.gtx-bubble {
+    background-color: white !important;
+}
+.vimvixen-hint {
+    background-color: var(--darkreader-background-ffd76e, #684b00) !important;
+    border-color: var(--darkreader-background-c59d00, #9e7e00) !important;
+    color: var(--darkreader-text-302505, #d7d4cf) !important;
+}
+#vimvixen-console-frame {
+    color-scheme: light !important;
+}
+::placeholder {
+    opacity: 0.5 !important;
+}
+#edge-translate-panel-body,
+.MuiTypography-body1,
+.nfe-quote-text {
+    color: var(--darkreader-neutral-text) !important;
+}
+gr-main-header {
+    background-color: var(--darkreader-background-add8e6, #1b4958) !important;
+}
+.tou-z65h9k,
+.tou-mignzq,
+.tou-1b6i2ox,
+.tou-lnqlqk {
+    background-color: var(--darkreader-neutral-background) !important;
+}
+.tou-75mvi {
+    background-color: var(--darkreader-background-cfecf5, #0f3a47) !important;
+}
+.tou-ta9e87,
+.tou-1w3fhi0,
+.tou-1b8t2us,
+.tou-py7lfi,
+.tou-1lpmd9d,
+.tou-1frrtv8,
+.tou-17ezmgn {
+    background-color: var(--darkreader-background-f5f5f5, #1e2021) !important;
+}
+.tou-uknfeu {
+    background-color: var(--darkreader-background-faedda, #432c09) !important;
+}
+.tou-6i3zyv {
+    background-color: var(--darkreader-background-85c3d8, #245d70) !important;
+}
+div.mermaid-viewer-control-panel .btn {
+    background-color: var(--darkreader-neutral-background);
+    fill: var(--darkreader-neutral-text);
+}
+svg g rect.er {
+    fill: var(--darkreader-neutral-background) !important;
+}
+svg g rect.er.entityBox {
+    fill: var(--darkreader-neutral-background) !important;
+}
+svg g rect.er.attributeBoxOdd {
+    fill: var(--darkreader-neutral-background) !important;
+}
+svg g rect.er.attributeBoxEven {
+    fill: var(--darkreader-selection-background);
+    fill-opacity: 0.8 !important;
+}
+svg rect.er.relationshipLabelBox {
+    fill: var(--darkreader-neutral-background) !important;
+}
+svg g g.nodes rect,
+svg g g.nodes polygon {
+    fill: var(--darkreader-neutral-background) !important;
+}
+svg g rect.task {
+    fill: var(--darkreader-selection-background) !important;
+}
+svg line.messageLine0,
+svg line.messageLine1 {
+    stroke: var(--darkreader-neutral-text) !important;
+}
+div.mermaid .actor {
+    fill: var(--darkreader-neutral-background) !important;
+}
+mitid-authenticators-code-app > .code-app-container {
+    background-color: white !important;
+    padding-top: 1rem;
+}
+iframe#unpaywall[src$="unpaywall.html"] {
+    color-scheme: light !important;
+}
+select {
+    --darkreader-bg--form-control-background-color: rgba(22, 22, 22, 0) !important;
+}
+body#tumblr {
+    --darkreader-bg--secondary-accent: 31, 32, 34 !important;
+    --darkreader-bg--white: 23, 23, 23 !important;
+    --darkreader-text--black: 228, 224, 218 !important;
+}
+:host {
+    --d2l-border-color: var(--darkreader-bg--d2l-color-gypsum) !important;
+    --d2l-button-icon-background-color-hover: var(--darkreader-bg--d2l-color-gypsum) !important;
+    --d2l-color-ferrite: var(--darkreader-neutral-text) !important;
+    --d2l-color-sylvite: var(--darkreader-bg--d2l-color-sylvite) !important;
+    --d2l-dropdown-background-color: var(--darkreader-neutral-background) !important;
+    --d2l-dropdown-border-color: var(--darkreader-border--d2l-color-mica) !important;
+    --d2l-input-backgroud-color: var(--darkreader-neutral-background) !important;
+    --d2l-menu-border-color: var(--darkreader-bg--d2l-color-gypsum) !important;
+    --d2l-tooltip-background-color: var(--darkreader-neutral-background) !important;
+    --d2l-tooltip-border-color: var(--darkreader-bg--d2l-color-gypsum) !important;
+}
+:host([_floating]) .d2l-floating-buttons-container {
+    background-color: var(--darkreader-neutral-background) !important;
+    border-top-color: var(--darkreader-border--d2l-color-mica) !important;
+    opacity: 0.88 !important;
+}
+d2l-card {
+    background: var(--darkreader-neutral-background) !important;
+    border-color: var(--darkreader-border--d2l-color-gypsum) !important;
+}
+d2l-dropdown-content > div,
+d2l-menu-item {
+    background-color: var(--darkreader-neutral-background) !important;
+    border-radius: 10px !important;
+}
+d2l-empty-state-simple {
+    border-color: var(--darkreader-bg--d2l-color-gypsum) !important;
+}
+.d2l-button-filter > ul > li > a.vui-button {
+    border-color: var(--darkreader-border--d2l-color-mica) !important;
+}
+.d2l-label-text:has(.d2l-button-subtle-content):hover,
+.d2l-label-text:has(.d2l-button-subtle-content):focus,
+.d2l-label-text:has(.d2l-button-subtle-content):active {
+    background-color: var(--darkreader-bg--d2l-color-gypsum) !important;
+}
+.d2l-navigation-centerer {
+    color: inherit !important;
+}
+.d2l-tabs-layout {
+    border-color: var(--darkreader-border--d2l-color-gypsum) !important;
+}
+.d2l-input,
+.d2l-calendar-date,
+.d2l-htmleditor-container {
+    background-color: var(--darkreader-neutral-background) !important;
+}
+.d2l-collapsible-panel {
+    border: 1px solid var(--darkreader-border--d2l-color-mica) !important;
+    border-radius: 0.4rem !important;
+}
+.d2l-collapsible-panel-divider {
+    border-bottom: 1px solid var(--darkreader-border--d2l-color-mica) !important;
+}
+.d2l-w2d-flex {
+    border-bottom: 2px solid var(--darkreader-border--d2l-color-mica) !important;
+}
+.d2l-collapsible-panel scrolled,
+.d2l-collapsible-panel-header,
+.d2l-w2d-collection-fixed {
+    background-color: var(--darkreader-neutral-background) !important;
+}
+.d2l-loading-spinner-bg {
+    fill: var(--darkreader-bg--d2l-color-gypsum) !important;
+}
+.d2l-loading-spinner-bg-stroke {
+    stroke: var(--darkreader-border--d2l-color-mica) !important;
+}
+.d2l-loading-spinner-wrapper svg path,
+.d2l-loading-spinner-wrapper svg circle {
+    fill: var(--darkreader-neutral-background) !important;
+}
+.d2l-twopanelselector-side.d2l-twopanelselector-side-sep {
+    background: var(--darkreader-bg--d2l-color-mica) !important;
+}
+.d2l-le-TreeAccordionItem-anchor::before {
+    background: var(--darkreader-bg--d2l-color-corundum) !important;
+}
+table[class|="moz-header"] {
+    background: none;
+}
+*[style*="color: rgba(0,0,0,"]:not([style*="color: rgba(0,0,0,0)"]),
+*[style*="color: rgba(0, 0, 0,"]:not([style*="color: rgba(0, 0, 0, 0)"]),
+*[style*="color:#000"]:not(.cell-input > span),
+*[style*="color:black"]:not(.cell-input > span),
+*[style*="color:#282828"]:not(.cell-input > span),
+*[style*="color:#444"]:not(.cell-input > span),
+*[style*="color: #222222"]:not(.cell-input > span) {
+    color: var(--darkreader-neutral-text) !important;
+}
+*[style*="background:#fff"],
+*[style*="background-color:#fff"],
+*[style*="background: #fff"],
+*[style*="background: rgb(255, 255, 255)"] {
+    background: var(--darkreader-neutral-background) !important;
+}
+*[bgcolor="#F5F5F5"],
+*[style*="background-color: #F5F5F5"] {
+    background: var(--darkreader-background-f5f5f5, #1e2021) !important;
+}
+*[style*="background: #e6e6e6"] {
+    background: var(--darkreader-background-e6e6e6, #26292b) !important;
+}
+body[style*="background: rgb(255, 255, 255) !important"] *:not(a),
+.body[style*="background-color: rgb(254, 254, 254) !important"] *:not(a) {
+    background-color: var(--darkreader-neutral-background) !important;
+}
+div[style*="www.gstatic.com/android/"] {
+    background: none !important;
+}
+*[style*="background:#f9f9f9"] {
+    background: var(--darkreader-background-f9f9f9, #1b1e1f) !important;
+}
+body.mediawiki.skin-vector #mw-page-base {
+    background-image: none !important;
+}
+.overflow-hidden .spinning-bg,
+.overflow-hidden .solid-bg {
+    background: transparent !important;
+}
+*[style*="color: rgb(0,0,0) !imoprtant"][style*="--darkreader-inline-color"],
+*[style*="color: rgb(0, 0, 0) !important"][style*="--darkreader-inline-color"] {
+    -webkit-text-fill-color: var(--darkreader-inline-color) !important;
+}
+[class*="v-col--cols"] {
+    --v-col-is-grow:  !important;
+}
+.border-b {
+    border-bottom-style: var(--tw-border-style) !important;
+}
+td[background="https://services.google.com/fh/files/emails/bg_grey.png"] {
+    background-image: none !important;
+}
+embed[type="application/pdf"] { filter: invert(100%) contrast(90%); }</style></head>
+
+  <body>
+    <main class="page">
+      <div class="layout">
+        <div class="content">
+          <header class="hero">
+            <img src="COMP%202211%20Lab%208_%20Pet%20Foreground%20Segmentation%20with%20CNN_files/pet_examples_AFY9.png" alt="Oxford-IIIT Pet annotation examples">
+            <div class="hero-content">
+              <span class="course-label">COMP 2211 Introduction to Artificial Intelligence</span>
+              <h1>Lab 8: Pet Foreground Segmentation with a Convolutional Neural Network</h1>
+              <p class="subtitle">
+                Build a compact image segmentation pipeline: load paired pet images and masks, train a CNN-based foreground separator, and evaluate pixel-level predictions with IoU.
+              </p>
+              <div class="actions">
+                <a class="button" download="" href="https://course.cse.ust.hk/comp2211/labs/lab8/files/lab8_tasks.ipynb">Download Task Notebook</a>
+                <a class="button secondary" download="" href="https://course.cse.ust.hk/comp2211/labs/lab8/data/data.zip">Download Dataset</a>
+              </div>
+            </div>
+          </header>
+
+          <section class="section" id="review">
+            <div class="section-header">
+              <h2>Review</h2>
+            </div>
+            <div class="section-body">
+              <p>
+                Download the <a href="https://course.cse.ust.hk/comp2211/labs/lab8/files/lab8_review.ipynb" download="">review notebook</a> for a CNN recap using MNIST digit classification. The task then applies convolutional features to pixel-level Pet segmentation.
+              </p>
+              <ul class="topic-list">
+                <li>Basics of convolutional layers</li>
+                <li>Image tensors and normalization</li>
+                <li>Classification model construction</li>
+                <li>Training and validation</li>
+                <li>Saving and reloading a model</li>
+                <li>Transition from classification to segmentation</li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="section" id="introduction">
+            <div class="section-header">
+              <h2>Introduction</h2>
+            </div>
+            <div class="section-body">
+              <p>
+                Image segmentation predicts a label for each pixel in an image. Instead of only answering what appears in an image, a segmentation model also predicts where the object is. In this lab, a CNN learns to separate the pet foreground from border and background pixels.
+              </p>
+              <h3>Dataset: Oxford-IIIT Pet</h3>
+              <p>
+                The supplied archive contains <strong>3,680 paired images and trimaps</strong> across 37 breeds. Images are RGB; model inputs are float32 in [0,1] with shape (128,128,3). Targets have shape (128,128,1). For this lab, the original trimap is simplified into a binary foreground mask: pet pixels are labeled <code>1</code>, while border and background pixels are labeled <code>0</code>.
+              </p>
+              <table class="dataset-table">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Role</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>RGB image</td>
+                    <td>Raw input</td>
+                    <td>A pet image resized and normalized for CNN training.</td>
+                  </tr>
+                  <tr>
+                    <td>Trimap annotation</td>
+                    <td>Original label</td>
+                    <td>A pixel-level annotation with pet, border, and background regions.</td>
+                  </tr>
+                  <tr>
+                    <td>Binary foreground mask</td>
+                    <td>Target</td>
+                    <td>A simplified mask where pet pixels are <code>1</code> and all other pixels are <code>0</code>.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="section" id="labwork">
+            <div class="section-header">
+              <h2>Lab Work</h2>
+            </div>
+            <div class="section-body">
+              <p>
+                Download <a download="" href="https://course.cse.ust.hk/comp2211/labs/lab8/files/lab8_tasks.ipynb">lab8_tasks.ipynb</a> and open it in Google Colab. Download <a download="" href="https://course.cse.ust.hk/comp2211/labs/lab8/data/data.zip">data.zip</a>, then place <code>data.zip</code> at the path shown in the setup cell. In Colab this is <code>MyDrive/COMP2211/Lab8/data.zip</code>; for a local runtime, change <code>DATA_ZIP</code>. Extracted files must be under <code>data/images</code> and <code>data/annotations/trimaps</code>.
+              </p>
+              <div class="task-grid">
+                <article class="task-card">
+                  <div class="task-number">Task 1</div>
+                  <h3>Data Loading and Processing</h3>
+                  <p>
+                    Implement the deterministic 80/20 split in <code>DataLoader</code>. The provided helpers load paired images and trimaps, resize to <code>128 x 128</code>, normalize RGB images, and build binary foreground masks.
+                  </p>
+                </article>
+                <article class="task-card">
+                  <div class="task-number">Task 2</div>
+                  <h3>Model Building</h3>
+                  <p>
+                    Implement a <code>BackgroundSeparater</code> model by subclassing <code>tf.keras.Model</code>. The CNN should output a foreground probability mask with shape <code>(batch, 128, 128, 1)</code>.
+                  </p>
+                </article>
+                <article class="task-card">
+                  <div class="task-number">Task 3</div>
+                  <h3>Customized IoU Metric</h3>
+                  <p>
+                    Implement a stateful <code>IoUScore</code> metric that accumulates intersection and union across batches, so Keras can report meaningful segmentation performance.
+                  </p>
+                </article>
+                <article class="task-card">
+                  <div class="task-number">Task 4</div>
+                  <h3>Model Training</h3>
+                  <p>
+                    Compile the segmentation model with <code>BinaryCrossentropy</code>, choose an optimizer, train with validation data, inspect mask predictions, and save the final checkpoint.
+                  </p>
+                </article>
+              </div>
+              <div class="download-strip">
+                <div class="download-box">
+                  <strong>Notebook</strong>
+                  <a download="" href="https://course.cse.ust.hk/comp2211/labs/lab8/files/lab8_tasks.ipynb">lab8_tasks.ipynb</a>
+                </div>
+                <div class="download-box">
+                  <strong>Dataset</strong>
+                  <a download="" href="https://course.cse.ust.hk/comp2211/labs/lab8/data/data.zip">data.zip</a>, used as <code>data.zip</code> in Colab
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="section" id="grading">
+            <div class="section-header">
+              <h2>Submission &amp; Deadline</h2>
+            </div>
+            <div class="section-body">
+              <ul class="submission-list">
+                <li><strong>Submission deadline:</strong> 22 November 2026, 23:59 (Hong Kong time, UTC+8).</li>
+                <li>This lab is graded out of <strong>10 points: 5 functional points + up to 5 performance points</strong>. Grading will run on the <a href="https://zinc.cse.ust.hk/">ZINC Online Submission System</a>.</li>
+                <li>Submit your completed <code>lab8_task.py</code> and your own trained <code>model.weights.h5</code>. Upload these two files directly to ZINC; do not upload a ZIP or an enclosing folder. Export <code>lab8_tasks.ipynb</code> as Python and rename it to <code>lab8_task.py</code>.</li>
+<li>The grader reconstructs <code>BackgroundSeparater()</code> with no arguments and loads your weights. Keep the exported imports, helpers, class names and main guards. Importing your file must not mount Drive, load data, print, or train.</li>
+<li>Performance points are alternative totals (0, 1, 3, or 5), not added together. Use the separate test set for grading; use validation to choose your checkpoint.</li>
+                <li>You may submit up to <strong>50 times</strong> before the deadline. <strong>Only your last submission is used for final grading</strong>, not the submission with the highest practice score.</li>
+                <li>Keep the segmentation model compact enough to load and evaluate within the grading resource limits.</li>
+              </ul>
+              <h3>Functional checks: 5 points</h3>
+              <table class="dataset-table">
+                <thead><tr><th>Component</th><th>Points</th><th>Requirement</th></tr></thead>
+                <tbody>
+                  <tr><td>DataLoader.load_data</td><td>2</td><td>Correct deterministic seed42 80/20 split and paired-path ordering.</td></tr>
+                  <tr><td>IoUScore.update_state</td><td>2</td><td>Correct cumulative intersection/union, strict thresholding, and TensorFlow graph execution.</td></tr>
+                  <tr><td>IoUScore.result / reset_state</td><td>1</td><td>Correct scalar result, state reset, and empty-union behavior.</td></tr>
+                </tbody>
+              </table>
+              <p>Each functional component receives its full points when it passes; otherwise, zero. Components are independent. Overall points = functional points + performance points. Correct functions and an IoU of 0.61 give 8/10; correct functions and an IoU of at least 0.62 give 10/10.</p>
+              <h3>Model performance: up to 5 points</h3>
+              <p>After grading, open Model performance and an IoU test to see your foreground IoU and performance score, even when that test does not pass.</p>
+              <div class="thresholds" aria-label="IoU grading thresholds">
+                <div class="threshold">
+                  <strong>1 point</strong>
+                  IoU &gt;= 0.58
+                </div>
+                <div class="threshold">
+                  <strong>3 points</strong>
+                  IoU &gt;= 0.60
+                </div>
+                <div class="threshold">
+                  <strong>5 points</strong>
+                  IoU &gt;= 0.62
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="section" id="faq">
+            <div class="section-header">
+              <h2>Frequently Asked Questions</h2>
+            </div>
+            <div class="section-body">
+              <h3>Do I need to improve a specific CNN?</h3><p>No. Implement a correct segmentation CNN and IoU metric. Architecture and optimizer choices are open; no novel architecture is required.</p>
+<h3>Why does my output shape differ from the review?</h3><p>The MNIST review predicts ten digit probabilities. The Pet task outputs one foreground probability per pixel: (batch,128,128,1). Keep masks binary rather than one-hot.</p>
+<h3>My IoU is zero early in training. Is it broken?</h3><p>Use the three toy IoU checks in the notebook first. A model predicting only background can legitimately have zero IoU. Inspect loss and predicted masks; use the provided reference training settings as a starting point.</p>
+<h3>Which weights should I submit?</h3><p>Your own checkpoint, selected by validation IoU and saved as model.weights.h5. The notebook reloads it before evaluation. Do not submit the MNIST review model.</p>
+<h3>Where can I check outputs?</h3><p>The notebooks include expected sample counts, tensor shapes, IoU examples and save/reload checks. These let you debug locally before submitting. To export a completed notebook, download <a href="https://course.cse.ust.hk/comp2211/labs/lab8/files/export_submission.py" download="">export_submission.py</a> beside it and run <code>python export_submission.py lab8_tasks.ipynb</code>.</p>
+            </div>
+          </section>
+        </div>
+
+        <aside class="sidebar">
+          <div class="side-box">
+            <div class="side-title">Menu</div>
+            <div class="side-body">
+              <ul>
+                <li><a href="#review">Review</a></li>
+                <li><a href="#introduction">Introduction</a></li>
+                <li><a href="#labwork">Lab Work</a></li>
+                <li><a href="#grading">Submission &amp; Deadline</a></li>
+                <li><a href="#faq">Frequently Asked Questions</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="side-box">
+            <div class="side-title">Page Maintained By</div>
+            <div class="side-body">
+              <ul class="meta-list">
+                <li>COMP2211 Teaching Team — Baiqiao Zhang</li>
+                
+                
+                <li>Last Modified: 5 November 2026</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="side-box">
+            <div class="side-title">Homepage</div>
+            <div class="side-body">
+              <a href="https://course.cse.ust.hk/comp2211">Course Homepage</a>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <footer>
+      Maintained by COMP 2211 Teaching Team © 2026 HKUST Computer Science and Engineering
+    </footer>
+  
+
+</body></html>

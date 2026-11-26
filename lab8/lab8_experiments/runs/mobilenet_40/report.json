@@ -1,0 +1,244 @@
+{
+  "global_iou": 0.8659990031027083,
+  "mean_image_iou": 0.8501237687768876,
+  "median_image_iou": 0.8826744072473323,
+  "worst_breed": "miniature_pinscher",
+  "worst_breed_iou": 0.7627295199199728,
+  "best_breed": "Persian",
+  "best_breed_iou": 0.9296296061112134,
+  "breeds_above_0_61": 37,
+  "breed_count": 37,
+  "breeds": {
+    "miniature_pinscher": {
+      "iou": 0.7627295199199728,
+      "images": 21,
+      "intersection": 92259,
+      "union": 120959
+    },
+    "beagle": {
+      "iou": 0.7968763289132872,
+      "images": 31,
+      "intersection": 103064,
+      "union": 129335
+    },
+    "Sphynx": {
+      "iou": 0.7975023356472996,
+      "images": 17,
+      "intersection": 67436,
+      "union": 84559
+    },
+    "Egyptian_Mau": {
+      "iou": 0.7988200195069709,
+      "images": 21,
+      "intersection": 83539,
+      "union": 104578
+    },
+    "great_pyrenees": {
+      "iou": 0.8004433446747087,
+      "images": 18,
+      "intersection": 77635,
+      "union": 96990
+    },
+    "american_bulldog": {
+      "iou": 0.8327847549961088,
+      "images": 23,
+      "intersection": 116639,
+      "union": 140059
+    },
+    "yorkshire_terrier": {
+      "iou": 0.8345433560445288,
+      "images": 20,
+      "intersection": 89660,
+      "union": 107436
+    },
+    "english_setter": {
+      "iou": 0.8438969006453669,
+      "images": 19,
+      "intersection": 84734,
+      "union": 100408
+    },
+    "scottish_terrier": {
+      "iou": 0.8447261579252631,
+      "images": 22,
+      "intersection": 91755,
+      "union": 108621
+    },
+    "german_shorthaired": {
+      "iou": 0.8471548189522734,
+      "images": 19,
+      "intersection": 83266,
+      "union": 98289
+    },
+    "Bengal": {
+      "iou": 0.8491909984827603,
+      "images": 17,
+      "intersection": 73320,
+      "union": 86341
+    },
+    "wheaten_terrier": {
+      "iou": 0.851069652875975,
+      "images": 19,
+      "intersection": 74632,
+      "union": 87692
+    },
+    "pomeranian": {
+      "iou": 0.858690354880156,
+      "images": 22,
+      "intersection": 116289,
+      "union": 135426
+    },
+    "boxer": {
+      "iou": 0.8615750920200683,
+      "images": 17,
+      "intersection": 70924,
+      "union": 82319
+    },
+    "chihuahua": {
+      "iou": 0.8671802364191792,
+      "images": 19,
+      "intersection": 84877,
+      "union": 97877
+    },
+    "Abyssinian": {
+      "iou": 0.8710677036233194,
+      "images": 18,
+      "intersection": 72242,
+      "union": 82935
+    },
+    "english_cocker_spaniel": {
+      "iou": 0.8728586940667391,
+      "images": 14,
+      "intersection": 53858,
+      "union": 61703
+    },
+    "japanese_chin": {
+      "iou": 0.8744931619819943,
+      "images": 20,
+      "intersection": 101798,
+      "union": 116408
+    },
+    "keeshond": {
+      "iou": 0.8746243410572644,
+      "images": 20,
+      "intersection": 106517,
+      "union": 121786
+    },
+    "samoyed": {
+      "iou": 0.8757286187683015,
+      "images": 23,
+      "intersection": 95401,
+      "union": 108939
+    },
+    "Bombay": {
+      "iou": 0.876070985405054,
+      "images": 17,
+      "intersection": 88958,
+      "union": 101542
+    },
+    "shiba_inu": {
+      "iou": 0.8766600541027953,
+      "images": 26,
+      "intersection": 121527,
+      "union": 138625
+    },
+    "Siamese": {
+      "iou": 0.8792444310656231,
+      "images": 23,
+      "intersection": 116834,
+      "union": 132880
+    },
+    "Birman": {
+      "iou": 0.8793052548710883,
+      "images": 17,
+      "intersection": 89355,
+      "union": 101620
+    },
+    "american_pit_bull_terrier": {
+      "iou": 0.8798010910305414,
+      "images": 23,
+      "intersection": 118540,
+      "union": 134735
+    },
+    "havanese": {
+      "iou": 0.8814640698455339,
+      "images": 21,
+      "intersection": 112875,
+      "union": 128054
+    },
+    "basset_hound": {
+      "iou": 0.8829862410109324,
+      "images": 12,
+      "intersection": 63726,
+      "union": 72171
+    },
+    "British_Shorthair": {
+      "iou": 0.8854258593598657,
+      "images": 26,
+      "intersection": 123408,
+      "union": 139377
+    },
+    "Ragdoll": {
+      "iou": 0.8866838410421282,
+      "images": 23,
+      "intersection": 127694,
+      "union": 144013
+    },
+    "staffordshire_bull_terrier": {
+      "iou": 0.8888267501330471,
+      "images": 20,
+      "intersection": 98538,
+      "union": 110863
+    },
+    "leonberger": {
+      "iou": 0.8898601993265077,
+      "images": 20,
+      "intersection": 104644,
+      "union": 117596
+    },
+    "saint_bernard": {
+      "iou": 0.8924135331260014,
+      "images": 18,
+      "intersection": 94694,
+      "union": 106110
+    },
+    "pug": {
+      "iou": 0.9026930231749509,
+      "images": 19,
+      "intersection": 103844,
+      "union": 115038
+    },
+    "Maine_Coon": {
+      "iou": 0.9142150271607594,
+      "images": 15,
+      "intersection": 84990,
+      "union": 92965
+    },
+    "newfoundland": {
+      "iou": 0.9153697257979115,
+      "images": 21,
+      "intersection": 105457,
+      "union": 115207
+    },
+    "Russian_Blue": {
+      "iou": 0.9231640200837131,
+      "images": 17,
+      "intersection": 99470,
+      "union": 107749
+    },
+    "Persian": {
+      "iou": 0.9296296061112134,
+      "images": 18,
+      "intersection": 146399,
+      "union": 157481
+    }
+  },
+  "model": "mobilenet_unet",
+  "epochs_requested": 40,
+  "batch_size": 32,
+  "augment": true,
+  "parameters": 14914273,
+  "checkpoint": "lab8_experiments/runs/mobilenet_40/best.weights.h5",
+  "validation_loss": 0.14378085732460022,
+  "validation_iou": 0.8659989833831787,
+  "elapsed_seconds": 292.94297766685486
+}
